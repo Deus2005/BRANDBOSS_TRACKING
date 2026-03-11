@@ -147,10 +147,10 @@ $lowStock = $db->count('inventory_items', "status = 'active' AND quantity_availa
                 </select>
             </div>
             <div class="col-md-4">
-                <button type="submit" class="btn btn-primary">
+                <!-- <button type="submit" class="btn btn-primary">
                     <i class="bi bi-search"></i> Filter
-                </button>
-                <a href="index.php" class="btn btn-outline-secondary">
+                </button> -->
+                <a href="index.php" class="btn btn-primary">
                     <i class="bi bi-x-lg"></i> Clear
                 </a>
             </div>
@@ -209,16 +209,15 @@ $lowStock = $db->count('inventory_items', "status = 'active' AND quantity_availa
                         </td>
                         <td><?php echo statusBadge($item['status']); ?></td>
                         <td class="text-center">
-                            <div class="btn-group btn-group-sm">
-                                <a href="view.php?id=<?php echo $item['id']; ?>" class="btn btn-outline-primary" title="View">
-                                    <i class="bi bi-eye"></i>
+                            <div class="action-btn">
+                                <a href="#" class="menu-toggle" style="font-size:1.5rem;text-decoration:none;color:#000;">
+                                    <i class="bi bi-three-dots-vertical"></i>
                                 </a>
-                                <a href="edit.php?id=<?php echo $item['id']; ?>" class="btn btn-outline-secondary" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="stock.php?id=<?php echo $item['id']; ?>" class="btn btn-outline-success" title="Adjust Stock">
-                                    <i class="bi bi-plus-slash-minus"></i>
-                                </a>
+                                <div class="action-dropdown">
+                                    <a href="view.php?id=<?php echo $item['id']; ?>" class="btn-view">View</a>
+                                    <a href="edit.php?id=<?php echo $item['id']; ?>" class="btn-edit">Edit</a>
+                                    <a href="stock.php?id=<?php echo $item['id']; ?>" class="btn-stock">Stock</a>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -228,6 +227,26 @@ $lowStock = $db->count('inventory_items', "status = 'active' AND quantity_availa
             </table>
         </div>
     </div>
+
+<script>
+    document.querySelectorAll(".menu-toggle").forEach(button => {
+
+    button.addEventListener("click", function(e){
+        e.preventDefault();
+
+        const dropdown = this.closest(".action-btn").querySelector(".action-dropdown");
+
+        document.querySelectorAll(".action-dropdown").forEach(menu => {
+            if(menu !== dropdown){
+                menu.style.display = "none";
+            }
+        });
+
+        dropdown.style.display =
+            dropdown.style.display === "block" ? "none" : "block";
+    });
+    });
+</script>
     
     <?php if ($result['total_pages'] > 1): ?>
     <div class="card-footer">

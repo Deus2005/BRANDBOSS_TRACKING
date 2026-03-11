@@ -259,11 +259,11 @@ $currentPage = basename($_SERVER['REQUEST_URI'], '.php');
                 </button>
                 <nav aria-label="breadcrumb" class="d-none d-md-block">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="<?php echo APP_URL; ?>">Home</a></li>
+                        <li class="breadcrumb-item"><a href="<?php echo APP_URL; ?>" style="text-decoration: none; color: inherit; cursor: pointer; font-weight: bold;">Home</a></li>
                         <?php if (isset($breadcrumbs)): ?>
                             <?php foreach ($breadcrumbs as $crumb): ?>
                                 <?php if (isset($crumb['url'])): ?>
-                                    <li class="breadcrumb-item"><a href="<?php echo $crumb['url']; ?>"><?php echo $crumb['title']; ?></a></li>
+                                    <li class="breadcrumb-item"><a href="<?php echo $crumb['url']; ?>" style="text-decoration: none; color: inherit; cursor: pointer; font-weight: bold;"><?php echo $crumb['title']; ?></a></li>
                                 <?php else: ?>
                                     <li class="breadcrumb-item active"><?php echo $crumb['title']; ?></li>
                                 <?php endif; ?>
