@@ -80,6 +80,11 @@ h6 {
     margin-bottom: 1.5rem;
 }
 
+aside{
+    width:250px;
+    height:100vh;
+    overflow-y:auto;
+}
 
 /* ========================================
    LOGIN PAGE
@@ -177,7 +182,7 @@ h6 {
     left: 0;
     height: 100vh;
     width: 260px;
-    background: var(--primary);
+    background: var(--primary-dark);
     color: var(--text-white);
     z-index: 1040;
     transition: var(--transition);
@@ -186,7 +191,7 @@ h6 {
 
 .sidebar-header {
     padding: 1.25rem;
-    background: var(--primary-dark);
+    background: var(--bg-dark);
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -250,13 +255,35 @@ h6 {
     text-decoration: none;
     transition: var(--transition);
     border-left: 3px solid transparent;
+    margin-bottom: 3px;
 }
 
-.nav-link:hover,
-.nav-link.active {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-white);
-    border-left-color: var(--bg-white);
+.nav-link:hover {
+    background: #ffffff7c;
+    color: var(--bg-white);
+    border-radius: 30rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    text-decoration: none;
+    transition: var(--transition);
+    border-left: 3px solid transparent;
+}
+.nav-link.active{
+    background-color: var(--bg-white);
+    color: var(--bg-dark);
+    font-weight: bold;
+    border-radius: 30rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    text-decoration: none;
+    transition: var(--transition);
+    border-left: 3px solid transparent;
 }
 
 .nav-link i {
@@ -478,6 +505,51 @@ h6 {
     padding: 1rem 1.25rem;
 }
 
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.donut-hole {
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.donut-hole {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--bg-white);
+}
+
+.donut-card {
+    border-radius: 50%;
+    width: 250px;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: var(--bg-white);
+    box-shadow: var(--shadow-sm);
+}
+
+.graph {
+    width: 250px;
+    height: 250px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
 
 /* Stats Cards */
 
@@ -486,10 +558,10 @@ h6 {
     transition: var(--transition);
 }
 
-.stats-card:hover {
+/* .stats-card:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow);
-}
+} */
 
 .stats-card .card-body {
     display: flex;
@@ -511,8 +583,8 @@ h6 {
 }
 
 .stats-icon {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     background: var(--primary-light);
     color: var(--primary);
     border-radius: 0.75rem;

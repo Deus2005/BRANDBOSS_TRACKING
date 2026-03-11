@@ -18,14 +18,19 @@ $user = $db->fetch("SELECT * FROM users WHERE id = ?", [$userId]);
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [
-        'full_name' => clean($_POST['full_name'] ?? ''),
+        'last_name' => clean($_POST['last_name'] ?? ''),
+        'first_name' => clean($_POST['first_name'] ?? ''),
         'email' => clean($_POST['email'] ?? ''),
         'phone' => clean($_POST['phone'] ?? '')
     ];
     
     // Validation
-    if (empty($data['full_name'])) {
-        $errors['full_name'] = 'Full name is required';
+    if (empty($data['last_name'])) {
+        $errors['last_name'] = 'Last name is required';
+    }
+
+    if (empty($data['first_name'])) {
+       $errors['first_name'] = 'First name is required';
     }
     
     if (empty($data['email'])) {
@@ -35,14 +40,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($db->exists('users', 'email = ? AND id != ?', [$data['email'], $userId])) {
         $errors['email'] = 'Email already in use';
     }
+     if (empty($data['phone'])) {
+        $errors['phone'] = 'Phone is required';
+          }   
+     elseif (!preg_match('/^[0-9+\-\s()]+$/', $data['phone'])) {
+        $errors['phone'] = 'Invalid phone format';
+    }
     
+
     if (empty($errors)) {
         try {
             $db->update('users', $data, 'id = ?', [$userId]);
             
             // Update session
-            $_SESSION['full_name'] = $data['full_name'];
+            $_SESSION['last_name'] = $data['last_name'];
+            $_SESSION['first_name'] = $data['first_name'];
             $_SESSION['email'] = $data['email'];
+            $_SESSION['phone'] = $data['phone'];
             
             $auth->logActivity($userId, 'updated_profile', 'profile', 'users', $userId);
             
@@ -108,10 +122,9 @@ if ($currentRole === 'user_2') {
         <div class="card">
             <div class="card-body text-center">
                 <div class="user-avatar mx-auto mb-3" style="width: 100px; height: 100px; font-size: 2.5rem;">
-                    <?php echo strtoupper(substr($user['full_name'], 0, 1)); ?>
+                    <?php echo strtoupper(substr($user['first_name'], 0, 1)); ?>
                 </div>
-                <h4 class="mb-1"><?php echo clean($user['full_name']); ?></h4>
-                <p class="text-muted mb-2"><?php echo clean($user['username']); ?></p>
+                <h4 class="mb-1"><?php echo clean($user['first_name']); ?></h4>
                 <span class="badge bg-<?php echo $user['role'] === 'super_admin' ? 'danger' : 'primary'; ?> mb-3">
                     <?php echo roleName($user['role']); ?>
                 </span>
@@ -186,12 +199,21 @@ if ($currentRole === 'user_2') {
                         </div>
                         
                         <div class="col-md-6 mb-3">
-                            <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control <?php echo isset($errors['full_name']) ? 'is-invalid' : ''; ?>" 
-                                   id="full_name" name="full_name" 
-                                   value="<?php echo clean($_POST['full_name'] ?? $user['full_name']); ?>" required>
-                            <?php if (isset($errors['full_name'])): ?>
-                            <div class="invalid-feedback"><?php echo $errors['full_name']; ?></div>
+                            <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control <?php echo isset($errors['first_name']) ? 'is-invalid' : ''; ?>" 
+                                   id="first_name" name="first_name"
+                                   value="<?php echo clean($_POST['first_name'] ?? $user['first_name']); ?>" required>  
+                                   <?php if (isset($errors['first_name'])): ?>
+                            <div class="invalid-feedback"><?php echo $errors['first_name']; ?></div>
+                            <?php endif; ?> 
+                        </div>
+                         <div class="col-md-6 mb-3">      
+                            <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control <?php echo isset($errors['last_name']) ? 'is-invalid' : ''; ?>" 
+                                   id="last_name" name="last_name" 
+                                   value="<?php echo clean($_POST['last_name'] ?? $user['last_name']); ?>" required>
+                            <?php if (isset($errors['last_name'])): ?>
+                            <div class="invalid-feedback"><?php echo $errors['last_name']; ?></div>
                             <?php endif; ?>
                         </div>
                         
@@ -206,9 +228,13 @@ if ($currentRole === 'user_2') {
                         </div>
                         
                         <div class="col-md-6 mb-3">
-                            <label for="phone" class="form-label">Phone Number</label>
-                            <input type="tel" class="form-control" id="phone" name="phone" 
-                                   value="<?php echo clean($_POST['phone'] ?? $user['phone']); ?>">
+                            <label for="phone" class="form-label">Phone Number<span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control <?php echo isset($errors['phone']) ? 'is-invalid' : ''; ?>" 
+                            id="phone" name="phone" 
+                            value="<?php echo clean($_POST['phone'] ?? $user['phone']); ?>" required>
+                            <?php if (isset($errors['phone'])): ?>
+                            <div class="invalid-feedback"><?php echo $errors['phone']; ?></div>
+                            <?php endif; ?>
                         </div>
                         
                         <div class="col-md-6 mb-3">

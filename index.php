@@ -121,62 +121,94 @@ if (in_array($role, ['super_admin', 'user_1'])) {
 
 <!-- Statistics Cards -->
 <div class="row g-3 mb-4">
-    <?php if (in_array($role, ['super_admin', 'user_1'])): ?>
-    <!-- Manager/Admin Stats -->
-    <div class="col-6 col-lg-3">
-        <div class="card stats-card">
-            <div class="card-body">
-                <div class="stats-info">
-                    <h3><?php echo number_format($stats['total_items']); ?></h3>
-                    <p>Inventory Items</p>
-                </div>
-                <div class="stats-icon">
-                    <i class="bi bi-box-seam"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-6 col-lg-3">
-        <div class="card stats-card" style="border-left-color: #198754;">
-            <div class="card-body">
-                <div class="stats-info">
-                    <h3 style="color: #198754;"><?php echo number_format($stats['total_stock']); ?></h3>
-                    <p>Total Stock</p>
-                </div>
-                <div class="stats-icon" style="background: #d1e7dd; color: #198754;">
-                    <i class="bi bi-stack"></i>
+    <div class="card-container">
+        <?php if (in_array($role, ['super_admin', 'user_1'])): ?>
+        <!-- Manager/Admin Stats -->
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="stats-info">
+                        <h3><?php echo number_format($stats['total_items']); ?></h3>
+                        <p>Inventory Items</p>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div class="col-6 col-lg-3">
-        <div class="card stats-card" style="border-left-color: #0d6efd;">
-            <div class="card-body">
-                <div class="stats-info">
-                    <h3 style="color: #0d6efd;"><?php echo $stats['ongoing_assignments']; ?></h3>
-                    <p>Ongoing Assignments</p>
-                </div>
-                <div class="stats-icon" style="background: #cfe2ff; color: #0d6efd;">
-                    <i class="bi bi-clipboard-check"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-6 col-lg-3">
-        <div class="card stats-card" style="border-left-color: #ffc107;">
-            <div class="card-body">
-                <div class="stats-info">
-                    <h3 style="color: #ffc107;"><?php echo $stats['open_tickets']; ?></h3>
-                    <p>Open Tickets</p>
-                </div>
-                <div class="stats-icon" style="background: #fff3cd; color: #ffc107;">
-                    <i class="bi bi-wrench"></i>
+        
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card" style="border-left-color: #0d6efd;">
+                <div class="card-body">
+                    <div class="stats-info">
+                        <h3 style="color: #0d6efd;"><?php echo $stats['ongoing_assignments']; ?></h3>
+                        <p>Ongoing Assignments</p>
+                    </div>
+                    <div class="stats-icon" style="background: #cfe2ff; color: #0d6efd;">
+                        <i class="bi bi-clipboard-check"></i>
+                    </div>
                 </div>
             </div>
         </div>
+        
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card" style="border-left-color: #ffc107;">
+                <div class="card-body">
+                    <div class="stats-info">
+                        <h3 style="color: #ffc107;"><?php echo $stats['open_tickets']; ?></h3>
+                        <p>Open Tickets</p>
+                    </div>
+                    <div class="stats-icon" style="background: #fff3cd; color: #ffc107;">
+                        <i class="bi bi-wrench"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <?php 
+
+        ?>
+
+        <div class="col-6 graph col-lg-3">
+            <div class="card donut-card" id="donutChart" >
+                <div class="donut-hole" style="background: #35EB97; border: 15px solid #ffffff;">       
+                        <div class="stock-info">
+                            <br>
+                            <h3 style="color: #ffffff; font-weight: bold;"><?php echo number_format($stats['total_stock']); ?></h3>
+                            <p style="color: #ffffff; font-weight: bold; font-size: 11px;">Total Stock</p>
+                        </div>
+                        <div class="stock-icon">
+                            <i class="bi bi-stack" style="font-size: 27px; color: #ffffff;"></i>
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const max = 1000;
+            const curr_value = <?php echo number_format($stats['total_stock']); ?>;
+            
+            const data = [
+                { value: curr_value, color: "#198754" },
+                { value: max - curr_value, color: "#ffffff" },
+            ];
+
+            const total = data.reduce((sum, d) => sum + d.value, 0);
+
+            let start = 0;
+            let parts = [];
+
+            data.forEach(d => {
+            const angle = (d.value / total) * 360;
+            const end = start + angle;
+
+            parts.push(`${d.color} ${start}deg ${end}deg`);
+            start = end;
+            });
+
+            document.getElementById("donutChart").style.background =`conic-gradient(${parts.join(",")})`; 
+        </script>
     </div>
     
     <?php elseif ($role === 'user_2'): ?>
