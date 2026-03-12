@@ -399,7 +399,6 @@ aside{
 .user-avatar {
     width: 36px;
     height: 36px;
-    background: var(--primary);
     color: var(--text-white);
     border-radius: 50%;
     display: flex;
@@ -490,7 +489,6 @@ aside{
 }
 
 .card-header.bg-primary {
-    background: var(--primary) !important;
     color: var(--text-white);
     border-radius: 0.75rem 0.75rem 0 0;
 }
@@ -688,6 +686,18 @@ aside{
     height: 30px;
 }
 
+.block-container {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: none;
+    border: none;
+    padding: 0.1rem;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    transition: var(--transition);
+}
+
 .action-btn{
     position: relative;
     display: inline-block;
@@ -703,6 +713,7 @@ aside{
     border-radius: 6px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     z-index: 999;
+    width: auto;
     
     display: none; /* hidden by default */
 }

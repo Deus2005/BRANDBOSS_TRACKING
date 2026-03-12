@@ -204,7 +204,7 @@ $currentPage = basename($_SERVER['REQUEST_URI'], '.php');
                 My Profile
             </a>
             
-            <a href="<?php echo APP_URL; ?>/logout.php" class="nav-link text-danger" data-confirm="Are you sure you want to logout?">
+            <a href="<?php echo APP_URL; ?>/logout.php" class="nav-link text-danger" data-confirm="Are you sure you want to logout?" style="color: #ffffff !important">
                 <i class="bi bi-box-arrow-left"></i>
                 Logout
             </a>

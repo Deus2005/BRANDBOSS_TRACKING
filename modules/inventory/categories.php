@@ -193,25 +193,57 @@ $categories = $db->fetchAll(
                             <span class="status-badge"><?php echo statusBadge($cat['status']); ?></span>
                         </td>
                         <td class="text-center">
-                            <div class="btn-group btn-group-sm">
-                                <button type="button" class="btn btn-outline-secondary btn-edit" 
-                                        data-id="<?php echo $cat['id']; ?>"
-                                        data-name="<?php echo clean($cat['category_name']); ?>"
-                                        data-description="<?php echo clean($cat['description']); ?>">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button type="button" class="btn btn-outline-<?php echo $cat['status'] === 'active' ? 'warning' : 'success'; ?> btn-toggle"
-                                        data-id="<?php echo $cat['id']; ?>"
-                                        title="<?php echo $cat['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>">
-                                    <i class="bi bi-<?php echo $cat['status'] === 'active' ? 'pause' : 'play'; ?>"></i>
-                                </button>
-                                <?php if ($cat['item_count'] == 0): ?>
-                                <button type="button" class="btn btn-outline-danger btn-delete" 
-                                        data-id="<?php echo $cat['id']; ?>"
-                                        data-name="<?php echo clean($cat['category_name']); ?>">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                                <?php endif; ?>
+                            <div class="action-btn">
+                                <a href="#" class="menu-toggle" style="font-size:1.5rem;text-decoration:none;color:#000;">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </a>
+                                <div class="action-dropdown">
+                                    <div class="edit-container">
+                                        <a href="#" class="btn-edit" 
+                                            data-id="<?php echo $cat['id']; ?>"
+                                            data-name="<?php echo clean($cat['category_name']); ?>"
+                                            data-description="<?php echo clean($cat['description']); ?>">
+                                            <div class="block-container">
+                                                <div class="edit icon">
+                                                    <i class="bi bi-pencil"></i>
+                                                </div>
+                                                <div class="edit text">
+                                                    Edit
+                                                </div>                                                 
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="activiation">
+                                        <a href="#" class="btn-toggle" 
+                                            data-id="<?php echo $cat['id']; ?>"
+                                            title="<?php echo $cat['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>">
+                                            <div class="block-container">
+                                                <div class="activation icon">
+                                                    <i class="bi bi-<?php echo $cat['status'] === 'active' ? 'pause' : 'play'; ?>"></i>
+                                                </div>
+                                                <div class="activation text">
+                                                    <?php echo $cat['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>
+                                                </div>
+                                            </div>
+                                        </a>    
+                                    </div>
+                                        <?php if ($cat['item_count'] == 0): ?>                                    
+                                    <div class="delete">
+                                        <a href="#" class="btn-delete" 
+                                            data-id="<?php echo $cat['id']; ?>"
+                                            data-name="<?php echo clean($cat['category_name']); ?>">
+                                            <div class="block-container">
+                                                <div class="delete icon">
+                                                    <i class="bi bi-trash"></i> 
+                                                </div>
+                                                <div class="delete text">
+                                                    Delete
+                                                </div>
+                                            </div>
+                                        </a>                                        
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -222,6 +254,26 @@ $categories = $db->fetchAll(
         </div>
     </div>
 </div>
+
+<script>
+    document.querySelectorAll(".menu-toggle").forEach(button => {
+
+    button.addEventListener("click", function(e){
+        e.preventDefault();
+
+        const dropdown = this.closest(".action-btn").querySelector(".action-dropdown");
+
+        document.querySelectorAll(".action-dropdown").forEach(menu => {
+            if(menu !== dropdown){
+                menu.style.display = "none";
+            }
+        });
+
+        dropdown.style.display =
+            dropdown.style.display === "block" ? "none" : "block";
+    });
+    });
+</script>
 
 <!-- Category Modal -->
 <div class="modal fade" id="categoryModal" tabindex="-1">

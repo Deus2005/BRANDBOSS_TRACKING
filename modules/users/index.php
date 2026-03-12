@@ -133,11 +133,26 @@ $manageableRoles = $currentRole === 'super_admin'
                     </tr>
                     <?php else: ?>
                     <?php foreach ($users as $user): ?>
+                            <?php 
+                                $color = '';
+                                if($user['role'] == 'super_admin') {
+                                    $color = '#DC3545';
+                                } elseif ($user['role'] == 'user_1') {
+                                    $color = '#0d6efd ';
+                                } elseif ($user['role'] == 'user_2') {
+                                    $color = '#FFC107';
+                                } elseif ($user['role'] == 'user_3') {
+                                    $color = '#6C757D';
+                                } elseif ($user['role'] == 'user_4') {
+                                    $color = '#F8D7DA';
+                                }
+                            ?>
                     <tr>
                         <td><strong><?php echo clean($user['employee_id']); ?></strong></td>
                         <td>
+
                             <div class="d-flex align-items-center">
-                                <div class="user-avatar me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                <div class="user-avatar me-2" style="width: 32px; height: 32px; font-size: 0.8rem; background: <?php echo $color; ?>">
                                     <?php echo strtoupper(substr($user['full_name'], 0, 1)); ?>
                                 </div>
                                 <?php echo clean($user['full_name']); ?>
@@ -146,7 +161,7 @@ $manageableRoles = $currentRole === 'super_admin'
                         <td><?php echo clean($user['username']); ?></td>
                         <td><?php echo clean($user['email']); ?></td>
                         <td>
-                            <span class="badge bg-<?php echo $user['role'] === 'super_admin' ? 'danger' : 'primary'; ?>">
+                            <span class="badge bg-<?php echo $user['role'] === 'super_admin' ? 'danger' : 'primary'; ?>" style="font-color: <?php echo $color; ?>">
                                 <?php echo roleName($user['role']); ?>
                             </span>
                         </td>
