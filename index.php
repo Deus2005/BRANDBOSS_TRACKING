@@ -186,28 +186,53 @@ if (in_array($role, ['super_admin', 'user_1'])) {
         </div>
 
         <script>
-            const max = 1000;
-            const curr_value = <?php echo number_format($stats['total_stock']); ?>;
-            
-            const data = [
-                { value: curr_value, color: "#198754" },
-                { value: max - curr_value, color: "#ffffff" },
-            ];
+            const max = 1000; // max value
+            const targetValue = <?php echo number_format($stats['total_stock']); ?>;
 
-            const total = data.reduce((sum, d) => sum + d.value, 0);
+            let currentValue = 0;
 
-            let start = 0;
-            let parts = [];
+            function drawDonut(value){
 
-            data.forEach(d => {
-            const angle = (d.value / total) * 360;
-            const end = start + angle;
+                const data = [
+                    { value: value, color: "#198754" },
+                    { value: max - value, color: "#ffffff" },
+                ];
 
-            parts.push(`${d.color} ${start}deg ${end}deg`);
-            start = end;
-            });
+                const total = data.reduce((sum, d) => sum + d.value, 0);
 
-            document.getElementById("donutChart").style.background =`conic-gradient(${parts.join(",")})`; 
+                let start = 0;
+                let parts = [];
+
+                data.forEach(d => {
+                    const angle = (d.value / total) * 360;
+                    const end = start + angle;
+
+                    parts.push(`${d.color} ${start}deg ${end}deg`);
+                    start = end;
+                });
+
+                document.getElementById("donutChart").style.background =
+                    `conic-gradient(${parts.join(",")})`;
+            }
+
+            function animateDonut(){
+
+                const speed = 10; // lower = faster animation
+
+                const interval = setInterval(() => {
+                    currentValue += speed;
+
+                    if(currentValue >= targetValue){
+                        currentValue = targetValue;
+                        clearInterval(interval);
+                    }
+
+                    drawDonut(currentValue);
+
+                }, 10);
+            }
+
+            animateDonut();     
         </script>
     </div>
     

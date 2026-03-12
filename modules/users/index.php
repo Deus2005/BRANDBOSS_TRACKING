@@ -161,7 +161,7 @@ $manageableRoles = $currentRole === 'super_admin'
                         <td><?php echo clean($user['username']); ?></td>
                         <td><?php echo clean($user['email']); ?></td>
                         <td>
-                            <span class="badge bg-<?php echo $user['role'] === 'super_admin' ? 'danger' : 'primary'; ?>" style="font-color: <?php echo $color; ?>">
+                            <span class="badge bg-<?php echo $user['role'] === 'super_admin' ? 'danger' : 'primary'; ?>" style="color: #000000; font-weight: bold; background: none !important">
                                 <?php echo roleName($user['role']); ?>
                             </span>
                         </td>
@@ -171,27 +171,73 @@ $manageableRoles = $currentRole === 'super_admin'
                         </td>
                         <td class="text-center">
                             <?php if ($user['id'] != $auth->userId()): ?>
-                            <div class="btn-group btn-group-sm">
-                                <a href="edit.php?id=<?php echo $user['id']; ?>" class="btn btn-outline-secondary" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="reset-password.php?id=<?php echo $user['id']; ?>" class="btn btn-outline-warning" title="Reset Password">
-                                    <i class="bi bi-key"></i>
-                                </a>
-                                <?php if ($user['status'] === 'active'): ?>
-                                <button type="button" class="btn btn-outline-danger btn-status" 
-                                        data-id="<?php echo $user['id']; ?>" data-action="suspend" title="Suspend">
-                                    <i class="bi bi-pause"></i>
-                                </button>
-                                <?php else: ?>
-                                <button type="button" class="btn btn-outline-success btn-status" 
-                                        data-id="<?php echo $user['id']; ?>" data-action="activate" title="Activate">
-                                    <i class="bi bi-play"></i>
-                                </button>
-                                <?php endif; ?>
-                            </div>
+                                <div class="action-btn">
+                                    <a href="#" class="menu-toggle" style="font-size:1.5rem;text-decoration:none;color:#000;">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </a>
+                                    <div class="action-dropdown">
+                                        <div class="edit-container">
+                                            <a href="edit.php?id=<?php echo $user['id']; ?>" class="btn-edit">
+                                                <div class="block-container">
+                                                    <div class="edit icon">
+                                                        <i class="bi bi-key"></i>
+                                                    </div>
+                                                    <div class="edit text">
+                                                        Edit
+                                                    </div>                                                 
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="reset-password-container">
+                                            <a href="reset-password.php?id=<?php echo $user['id']; ?>" class="btn-reset-password">
+                                                <div class="block-container">
+                                                    <div class="reset icon">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </div>
+                                                    <div class="reset text">
+                                                        Reset Password
+                                                    </div>                                                 
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <?php if ($user['status'] === 'active'): ?>
+                                            <div class="activiation">
+                                                <a href="#" class="btn-status btn-toggle"
+                                                    data-id="<?php echo $user['id']; ?>"
+                                                    data-action="<?php echo $user['status'] === 'active' ? 'suspend' : 'activate'; ?>"
+                                                    title="<?php echo $user['status'] === 'active' ? 'Suspend' : 'Activate'; ?>">
+
+                                                    <div class="block-container">
+                                                        <div class="activation icon">
+                                                            <i class="bi bi-<?php echo $user['status'] === 'active' ? 'pause' : 'play'; ?>"></i>
+                                                        </div>
+                                                        <div class="activation text">
+                                                            <?php echo $user['status'] === 'active' ? 'Suspend' : 'Activate'; ?>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <?php if ($cat['item_count'] == 0): ?>                                    
+                                                <div class="delete">
+                                                    <a href="#" class="btn-delete" 
+                                                        data-id="<?php echo $cat['id']; ?>"
+                                                        data-name="<?php echo clean($cat['category_name']); ?>">
+                                                        <div class="block-container">
+                                                            <div class="delete icon">
+                                                                <i class="bi bi-trash"></i> 
+                                                            </div>
+                                                            <div class="delete text">
+                                                                Delete
+                                                            </div>
+                                                        </div>
+                                                    </a>                                        
+                                                </div>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
                             <?php else: ?>
-                            <span class="text-muted small">Current User</span>
+                                <span class="text-muted small">Current User</span>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -201,6 +247,26 @@ $manageableRoles = $currentRole === 'super_admin'
             </table>
         </div>
     </div>
+
+<script>
+    document.querySelectorAll(".menu-toggle").forEach(button => {
+
+    button.addEventListener("click", function(e){
+        e.preventDefault();
+
+        const dropdown = this.closest(".action-btn").querySelector(".action-dropdown");
+
+        document.querySelectorAll(".action-dropdown").forEach(menu => {
+            if(menu !== dropdown){
+                menu.style.display = "none";
+            }
+        });
+
+        dropdown.style.display =
+            dropdown.style.display === "block" ? "none" : "block";
+    });
+    });
+</script>
     
     <?php if ($result['total_pages'] > 1): ?>
     <div class="card-footer">
