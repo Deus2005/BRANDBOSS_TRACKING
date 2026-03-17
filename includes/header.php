@@ -224,7 +224,7 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                 </button>
                 <nav aria-label="breadcrumb" class="d-none d-md-block">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="<?php echo APP_URL; ?>">Home</a></li>
+                        <li class="breadcrumb-item"><a id="home-link" href="<?php echo APP_URL; ?>">Home</a></li>
                         <?php if (isset($breadcrumbs)): ?>
                             <?php foreach ($breadcrumbs as $crumb): ?>
                                 <?php if (isset($crumb['url'])): ?>
