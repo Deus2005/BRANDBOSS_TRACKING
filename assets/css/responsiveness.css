@@ -1,0 +1,93 @@
+/* ===============================
+   LOGIN PAGE RESPONSIVENESS
+================================= */
+@media (max-width: 1024px) {
+    .signin-container {
+        flex-direction: column;      
+        padding: 1.5rem;             
+        gap: 1.5rem;
+        max-width: 90%;
+    }
+
+    .signin-image {
+        max-width: 80%;
+    }
+
+    .signin-body {
+        max-width: 100%;
+    }
+
+    .signin-body h2 {
+        font-size: 2rem;
+    }
+
+    .signin-body p {
+        font-size: 1.1rem;
+    }
+
+    .signin-footer {
+        margin-top: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .signin-wrapper {
+        padding: 0.5rem;
+    }
+
+    .signin-container {
+        padding: 1rem;
+        gap: 1rem;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    }
+
+    .signin-body h2 {
+        font-size: 1.75rem;
+        text-align: center;
+    }
+
+    .signin-body p {
+        font-size: 1rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .signin-image {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    .signin-button {
+        padding: 10px;
+        font-size: 0.95rem;
+    }
+
+    .remember-me {
+        flex-direction: row;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .signin-footer {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .signin-body h2 {
+        font-size: 1.5rem;
+    }
+
+    .signin-body p {
+        font-size: 0.95rem;
+    }
+
+    .signin-button {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+
+    .signin-container {
+        padding: 0.8rem;
+    }
+}
