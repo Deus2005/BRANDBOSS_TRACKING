@@ -15,7 +15,7 @@ $currentRole = $auth->role();
 $notificationCount = getUnreadNotificationCount($auth->userId());
 
 // Get current page for active nav
-$currentPage = basename($_SERVER['REQUEST_URI'], '.php');
+$currentPage = basename($_SERVER['PHP_SELF'], '.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,7 +42,7 @@ $currentPage = basename($_SERVER['REQUEST_URI'], '.php');
 </head>
 <body>
     <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-logo">
                 <i class="bi bi-tools"></i>
@@ -53,23 +53,23 @@ $currentPage = basename($_SERVER['REQUEST_URI'], '.php');
             </div>
         </div>
         
-        <nav class="sidebar-nav" id="sidebar-nav">
+        <nav class="sidebar-nav">
             <div class="nav-section">Main</div>
             
-            <a href="<?php echo APP_URL; ?>/index.php?view=dashboard" class="nav-link <?php echo (isset($_GET['view']) && $_GET['view'] == 'dashboard') ? 'active' : ''; ?>">
+            <a href="<?php echo APP_URL; ?>/index.php" class="nav-link <?php echo $currentPage === 'index' ? 'active' : ''; ?>">
                 <i class="bi bi-speedometer2"></i>
                 Dashboard
             </a>
-
+            
             <?php if ($auth->can('inventory')): ?>
             <div class="nav-section">Inventory</div>
             
-            <a href="<?php echo APP_URL; ?>/modules/inventory/index.php" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/modules/inventory/index.php') !== false ? 'active' : ''; ?>">
+            <a href="<?php echo APP_URL; ?>/modules/inventory/index.php" class="nav-link <?php echo strpos($currentPage, 'inventory') !== false ? 'active' : ''; ?>">
                 <i class="bi bi-box-seam"></i>
                 Items
             </a>
             
-            <a href="<?php echo APP_URL; ?>/modules/inventory/categories.php" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/modules/inventory/categories.php') !== false ? 'active' : ''; ?>">
+            <a href="<?php echo APP_URL; ?>/modules/inventory/categories.php" class="nav-link">
                 <i class="bi bi-tags"></i>
                 Categories
             </a>
@@ -78,12 +78,12 @@ $currentPage = basename($_SERVER['REQUEST_URI'], '.php');
             <?php if ($auth->can('users')): ?>
             <div class="nav-section">Administration</div>
             
-            <a href="<?php echo APP_URL; ?>/modules/users/index.php" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/modules/users/') !== false ? 'active' : ''; ?>">
+            <a href="<?php echo APP_URL; ?>/modules/users/index.php" class="nav-link <?php echo strpos($currentPage, 'users') !== false ? 'active' : ''; ?>">
                 <i class="bi bi-people"></i>
                 Users
             </a>
             
-            <a href="<?php echo APP_URL; ?>/modules/areas/index.php" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/modules/areas/index.php') !== false ? 'active' : ''; ?>">
+            <a href="<?php echo APP_URL; ?>/modules/areas/index.php" class="nav-link">
                 <i class="bi bi-geo-alt"></i>
                 Areas
             </a>
@@ -92,7 +92,7 @@ $currentPage = basename($_SERVER['REQUEST_URI'], '.php');
             <?php if ($auth->can('assignments') || $auth->can('assignments.view')): ?>
             <div class="nav-section">Operations</div>
             
-            <a href="<?php echo APP_URL; ?>/modules/assignments/index.php" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/modules/assignments/index.php') !== false ? 'active' : ''; ?>">
+            <a href="<?php echo APP_URL; ?>/modules/assignments/index.php" class="nav-link <?php echo strpos($currentPage, 'assignment') !== false ? 'active' : ''; ?>">
                 <i class="bi bi-clipboard-check"></i>
                 Assignments
                 <?php 
@@ -106,14 +106,14 @@ $currentPage = basename($_SERVER['REQUEST_URI'], '.php');
             <?php endif; ?>
             
             <?php if ($auth->can('installations') || $auth->can('installations.view')): ?>
-            <a href="<?php echo APP_URL; ?>/modules/installations/index.php" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/modules/installations/index.php') !== false ? 'active' : ''; ?>">
+            <a href="<?php echo APP_URL; ?>/modules/installations/index.php" class="nav-link <?php echo strpos($currentPage, 'installation') !== false ? 'active' : ''; ?>">
                 <i class="bi bi-camera"></i>
                 Installations
             </a>
             <?php endif; ?>
             
             <?php if ($auth->can('inspections') || $auth->can('inspections.view')): ?>
-            <a href="<?php echo APP_URL; ?>/modules/inspections/index.php" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/modules/inspections/index.php') !== false ? 'active' : ''; ?>">
+            <a href="<?php echo APP_URL; ?>/modules/inspections/index.php" class="nav-link <?php echo strpos($currentPage, 'inspection') !== false ? 'active' : ''; ?>">
                 <i class="bi bi-search"></i>
                 Inspections
                 <?php 
@@ -127,7 +127,7 @@ $currentPage = basename($_SERVER['REQUEST_URI'], '.php');
             <?php endif; ?>
             
             <?php if ($auth->can('maintenance') || $auth->can('maintenance.view')): ?>
-            <a href="<?php echo APP_URL; ?>/modules/maintenance/index.php" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/modules/maintenance/index.php') !== false ? 'active' : ''; ?>">
+            <a href="<?php echo APP_URL; ?>/modules/maintenance/index.php" class="nav-link <?php echo strpos($currentPage, 'maintenance') !== false ? 'active' : ''; ?>">
                 <i class="bi bi-wrench"></i>
                 Maintenance
                 <?php 
@@ -191,7 +191,7 @@ $currentPage = basename($_SERVER['REQUEST_URI'], '.php');
             <?php if ($auth->can('reports')): ?>
             <div class="nav-section">Reports</div>
             
-            <a href="<?php echo APP_URL; ?>/modules/reports/index.php" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/modules/reports/index.php') !== false ? 'active' : ''; ?>">
+            <a href="<?php echo APP_URL; ?>/modules/reports/index.php" class="nav-link <?php echo strpos($currentPage, 'report') !== false ? 'active' : ''; ?>">
                 <i class="bi bi-graph-up"></i>
                 Reports
             </a>
@@ -204,47 +204,12 @@ $currentPage = basename($_SERVER['REQUEST_URI'], '.php');
                 My Profile
             </a>
             
-            <a href="<?php echo APP_URL; ?>/logout.php" class="nav-link text-danger" data-confirm="Are you sure you want to logout?" style="color: #ffffff !important">
+            <a href="<?php echo APP_URL; ?>/logout.php" class="nav-link text-danger" data-confirm="Are you sure you want to logout?">
                 <i class="bi bi-box-arrow-left"></i>
                 Logout
             </a>
         </nav>
     </aside>
-
-    <script>
-        const sidebar = document.getElementById('sidebar');
-        const scrollSpeed = 5; // pixels per frame
-        const edgeThreshold = 50; // pixels from top/bottom to start scrolling
-        let scrollDelta = 0;
-
-        sidebar.addEventListener('mousemove', e => {
-            const rect = sidebar.getBoundingClientRect();
-            const y = e.clientY - rect.top;
-
-            if (y < edgeThreshold) scrollDelta = -scrollSpeed;
-            else if (y > rect.height - edgeThreshold) scrollDelta = scrollSpeed;
-            else scrollDelta = 0;
-        });
-
-        function autoScroll() {
-            if (scrollDelta !== 0) {
-                sidebar.scrollBy({ top: scrollDelta, behavior: 'auto' });
-            }
-            requestAnimationFrame(autoScroll);
-        }
-        autoScroll();
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const aside = document.querySelector("aside");
-
-            const pos = sessionStorage.getItem("asideScroll");
-            if (pos) aside.scrollTop = pos;
-
-            aside.addEventListener("scroll", function () {
-                sessionStorage.setItem("asideScroll", aside.scrollTop);
-            });
-        });
-    </script>
     
     <!-- Sidebar Overlay (Mobile) -->
     <div class="sidebar-overlay"></div>
@@ -259,11 +224,11 @@ $currentPage = basename($_SERVER['REQUEST_URI'], '.php');
                 </button>
                 <nav aria-label="breadcrumb" class="d-none d-md-block">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="<?php echo APP_URL; ?>" style="text-decoration: none; color: inherit; cursor: pointer; font-weight: bold;">Home</a></li>
+                        <li class="breadcrumb-item"><a id="home-link" href="<?php echo APP_URL; ?>">Home</a></li>
                         <?php if (isset($breadcrumbs)): ?>
                             <?php foreach ($breadcrumbs as $crumb): ?>
                                 <?php if (isset($crumb['url'])): ?>
-                                    <li class="breadcrumb-item"><a href="<?php echo $crumb['url']; ?>" style="text-decoration: none; color: inherit; cursor: pointer; font-weight: bold;"><?php echo $crumb['title']; ?></a></li>
+                                    <li class="breadcrumb-item"><a href="<?php echo $crumb['url']; ?>"><?php echo $crumb['title']; ?></a></li>
                                 <?php else: ?>
                                     <li class="breadcrumb-item active"><?php echo $crumb['title']; ?></li>
                                 <?php endif; ?>
