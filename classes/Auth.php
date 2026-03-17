@@ -54,7 +54,6 @@ class Auth {
         
         return ['success' => true, 'message' => 'Login successful', 'user' => $user];
     }
-    
     /**
      * Logout user
      */
