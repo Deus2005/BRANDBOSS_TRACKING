@@ -214,9 +214,44 @@ $lowStock = $db->count('inventory_items', "status = 'active' AND quantity_availa
                                     <i class="bi bi-three-dots-vertical"></i>
                                 </a>
                                 <div class="action-dropdown">
-                                    <a href="view.php?id=<?php echo $item['id']; ?>" class="btn-view">View</a>
-                                    <a href="edit.php?id=<?php echo $item['id']; ?>" class="btn-edit">Edit</a>
-                                    <a href="stock.php?id=<?php echo $item['id']; ?>" class="btn-stock">Stock</a>
+                                    <div class="view-container">
+                                        <a href="view.php?id=<?php echo $item['id']; ?>" class="btn-view" >
+                                            <div class="block-container">
+                                                <div class="view icon">
+                                                    <i class="bi bi-eye"></i>
+                                                </div>
+                                                <div class="edit text">
+                                                    View
+                                                </div>                                                 
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="edit-container">
+                                        <a href="edit.php?id=<?php echo $item['id']; ?>" class="btn-edit">
+                                            <div class="block-container">
+                                                <div class="edit icon">
+                                                    <i class="bi bi-pencil"></i>
+                                                </div>
+                                                <div class="edit text">
+                                                    Edit
+                                                </div>
+                                            </div>
+                                        </a>    
+                                    </div>
+                                        <?php if ($cat['item_count'] == 0): ?>                                    
+                                    <div class="stock-container">
+                                        <a href="stock.php?id=<?php echo $item['id']; ?>" class="btn-stock" class="btn-stock">
+                                            <div class="block-container">
+                                                <div class="stock icon">
+                                                    <i class="bi bi-box-seam"></i>
+                                                </div>
+                                                <div class="stock text">
+                                                    Stock
+                                                </div>
+                                            </div>
+                                        </a>                                        
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </td>
@@ -227,26 +262,6 @@ $lowStock = $db->count('inventory_items', "status = 'active' AND quantity_availa
             </table>
         </div>
     </div>
-
-<script>
-    document.querySelectorAll(".menu-toggle").forEach(button => {
-
-    button.addEventListener("click", function(e){
-        e.preventDefault();
-
-        const dropdown = this.closest(".action-btn").querySelector(".action-dropdown");
-
-        document.querySelectorAll(".action-dropdown").forEach(menu => {
-            if(menu !== dropdown){
-                menu.style.display = "none";
-            }
-        });
-
-        dropdown.style.display =
-            dropdown.style.display === "block" ? "none" : "block";
-    });
-    });
-</script>
     
     <?php if ($result['total_pages'] > 1): ?>
     <div class="card-footer">
@@ -261,4 +276,45 @@ $lowStock = $db->count('inventory_items', "status = 'active' AND quantity_availa
     <?php endif; ?>
 </div>
 
-<?php require_once '../../includes/footer.php'; ?>
+<script src="../../assets/js/action.js"></script>
+
+<?php 
+$extraScripts = <<<'SCRIPT'
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form');
+    if (!form) return;
+
+    var searchInput = form.querySelector('input[name="search"]');
+    var filterSelects = form.querySelectorAll('select');
+
+    // Longer debounce
+    var autoSubmit = App.debounce(function() {
+        form.submit();
+    }, 800);
+
+    if (searchInput) {
+        searchInput.focus();
+
+        // Move cursor to end safely
+        setTimeout(function(){
+            var valueLength = searchInput.value.length;
+            searchInput.setSelectionRange(valueLength, valueLength);
+        }, 0);
+
+        searchInput.addEventListener('input', function() {
+            autoSubmit();
+        });
+    }
+
+    filterSelects.forEach(function(select) {
+        select.addEventListener('change', function() {
+            form.submit(); // no need debounce for selects
+        });
+    });
+});
+</script>
+SCRIPT;
+
+require_once '../../includes/footer.php'; 
+?>

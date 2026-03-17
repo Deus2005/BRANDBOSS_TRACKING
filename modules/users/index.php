@@ -75,7 +75,7 @@ $manageableRoles = $currentRole === 'super_admin'
                        value="<?php echo clean($search); ?>">
             </div>
             <div class="col-md-3">
-                <select name="role" class="form-select">
+                <select name="role" class="form-select" name="form-select">
                     <option value="">All Roles</option>
                     <?php foreach ($manageableRoles as $role): ?>
                     <option value="<?php echo $role; ?>" <?php echo $roleFilter === $role ? 'selected' : ''; ?>>
@@ -85,7 +85,7 @@ $manageableRoles = $currentRole === 'super_admin'
                 </select>
             </div>
             <div class="col-md-2">
-                <select name="status" class="form-select">
+                <select name="status" class="form-select" name="form-select">
                     <option value="">All Status</option>
                     <option value="active" <?php echo $statusFilter === 'active' ? 'selected' : ''; ?>>Active</option>
                     <option value="inactive" <?php echo $statusFilter === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
@@ -200,40 +200,6 @@ $manageableRoles = $currentRole === 'super_admin'
                                                 </div>
                                             </a>
                                         </div>
-                                        <?php if ($user['status'] === 'active'): ?>
-                                            <div class="activiation">
-                                                <a href="#" class="btn-status btn-toggle"
-                                                    data-id="<?php echo $user['id']; ?>"
-                                                    data-action="<?php echo $user['status'] === 'active' ? 'suspend' : 'activate'; ?>"
-                                                    title="<?php echo $user['status'] === 'active' ? 'Suspend' : 'Activate'; ?>">
-
-                                                    <div class="block-container">
-                                                        <div class="activation icon">
-                                                            <i class="bi bi-<?php echo $user['status'] === 'active' ? 'pause' : 'play'; ?>"></i>
-                                                        </div>
-                                                        <div class="activation text">
-                                                            <?php echo $user['status'] === 'active' ? 'Suspend' : 'Activate'; ?>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </div>
-                                            <?php if ($cat['item_count'] == 0): ?>                                    
-                                                <div class="delete">
-                                                    <a href="#" class="btn-delete" 
-                                                        data-id="<?php echo $cat['id']; ?>"
-                                                        data-name="<?php echo clean($cat['category_name']); ?>">
-                                                        <div class="block-container">
-                                                            <div class="delete icon">
-                                                                <i class="bi bi-trash"></i> 
-                                                            </div>
-                                                            <div class="delete text">
-                                                                Delete
-                                                            </div>
-                                                        </div>
-                                                    </a>                                        
-                                                </div>
-                                            <?php endif; ?>
-                                        <?php endif; ?>
                                     </div>
                                 </div>
                             <?php else: ?>
@@ -247,26 +213,6 @@ $manageableRoles = $currentRole === 'super_admin'
             </table>
         </div>
     </div>
-
-<script>
-    document.querySelectorAll(".menu-toggle").forEach(button => {
-
-    button.addEventListener("click", function(e){
-        e.preventDefault();
-
-        const dropdown = this.closest(".action-btn").querySelector(".action-dropdown");
-
-        document.querySelectorAll(".action-dropdown").forEach(menu => {
-            if(menu !== dropdown){
-                menu.style.display = "none";
-            }
-        });
-
-        dropdown.style.display =
-            dropdown.style.display === "block" ? "none" : "block";
-    });
-    });
-</script>
     
     <?php if ($result['total_pages'] > 1): ?>
     <div class="card-footer">
@@ -281,9 +227,44 @@ $manageableRoles = $currentRole === 'super_admin'
     <?php endif; ?>
 </div>
 
+<script src="../../assets/js/action.js"></script>
+
 <?php 
 $extraScripts = <<<'SCRIPT'
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form');
+    if (!form) return;
+
+    var searchInput = form.querySelector('input[name="search"]');
+    var filterSelects = form.querySelectorAll('select');
+
+    // Longer debounce
+    var autoSubmit = App.debounce(function() {
+        form.submit();
+    }, 800);
+
+    if (searchInput) {
+        searchInput.focus();
+
+        // Move cursor to end safely
+        setTimeout(function(){
+            var valueLength = searchInput.value.length;
+            searchInput.setSelectionRange(valueLength, valueLength);
+        }, 0);
+
+        searchInput.addEventListener('input', function() {
+            autoSubmit();
+        });
+    }
+
+    filterSelects.forEach(function(select) {
+        select.addEventListener('change', function() {
+            form.submit(); // no need debounce for selects
+        });
+    });
+});
+
 document.querySelectorAll('.btn-status').forEach(btn => {
     btn.addEventListener('click', function() {
         const id = this.dataset.id;

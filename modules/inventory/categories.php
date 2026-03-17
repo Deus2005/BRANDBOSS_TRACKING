@@ -255,29 +255,9 @@ $categories = $db->fetchAll(
     </div>
 </div>
 
-<script>
-    document.querySelectorAll(".menu-toggle").forEach(button => {
-
-    button.addEventListener("click", function(e){
-        e.preventDefault();
-
-        const dropdown = this.closest(".action-btn").querySelector(".action-dropdown");
-
-        document.querySelectorAll(".action-dropdown").forEach(menu => {
-            if(menu !== dropdown){
-                menu.style.display = "none";
-            }
-        });
-
-        dropdown.style.display =
-            dropdown.style.display === "block" ? "none" : "block";
-    });
-    });
-</script>
-
 <!-- Category Modal -->
 <div class="modal fade" id="categoryModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalTitle">Add Category</h5>
@@ -309,6 +289,13 @@ $categories = $db->fetchAll(
     </div>
 </div>
 
+<script src="../../assets/js/action.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/fitty"></script>
+
+<script>
+    fitty('modal', { minSize: 10, maxSize: 20 });
+</script>
 <?php 
 $extraScripts = <<<'SCRIPT'
 <script>

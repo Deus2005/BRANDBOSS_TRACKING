@@ -203,29 +203,65 @@ $areas = $result['data'];
                         <td><?php echo statusBadge($area['status']); ?></td>
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
-                                <button type="button" class="btn btn-outline-secondary btn-edit"
-                                        data-id="<?php echo $area['id']; ?>"
-                                        data-code="<?php echo clean($area['area_code']); ?>"
-                                        data-name="<?php echo clean($area['area_name']); ?>"
-                                        data-address="<?php echo clean($area['address']); ?>"
-                                        data-city="<?php echo clean($area['city']); ?>"
-                                        data-province="<?php echo clean($area['province']); ?>"
-                                        data-region="<?php echo clean($area['region']); ?>"
-                                        data-lat="<?php echo $area['latitude']; ?>"
-                                        data-lng="<?php echo $area['longitude']; ?>">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button type="button" class="btn btn-outline-<?php echo $area['status'] === 'active' ? 'warning' : 'success'; ?> btn-toggle"
-                                        data-id="<?php echo $area['id']; ?>">
-                                    <i class="bi bi-<?php echo $area['status'] === 'active' ? 'pause' : 'play'; ?>"></i>
-                                </button>
-                                <?php if ($area['assignment_count'] == 0): ?>
-                                <button type="button" class="btn btn-outline-danger btn-delete"
-                                        data-id="<?php echo $area['id']; ?>"
-                                        data-name="<?php echo clean($area['area_name']); ?>">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                                <?php endif; ?>
+                                <div class="action-btn">
+                                    <a href="#" class="menu-toggle" style="font-size:1.5rem;text-decoration:none;color:#000;">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </a>
+                                        <div class="action-dropdown">
+                                            <div class="edit-container">
+                                                <a href="#" class="btn-edit"
+                                                    data-id="<?php echo $area['id']; ?>"
+                                                    data-code="<?php echo clean($area['area_code']); ?>"
+                                                    data-name="<?php echo clean($area['area_name']); ?>"
+                                                    data-address="<?php echo clean($area['address']); ?>"
+                                                    data-city="<?php echo clean($area['city']); ?>"
+                                                    data-province="<?php echo clean($area['province']); ?>"
+                                                    data-region="<?php echo clean($area['region']); ?>"
+                                                    data-lat="<?php echo $area['latitude']; ?>"
+                                                    data-lng="<?php echo $area['longitude']; ?>">
+                                                    <div class="block-container">
+                                                        <div class="edit icon">
+                                                            <i class="bi bi-key"></i>
+                                                        </div>
+                                                        <div class="edit text">
+                                                            Edit
+                                                        </div>                                                 
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="activiation">
+                                                <a href="#" class="btn-status btn-toggle"
+                                                    data-id="<?php echo $area['id']; ?>"
+                                                    data-action="<?php echo $area['status'] === 'active' ? 'suspend' : 'activate'; ?>"
+                                                    title="<?php echo $area['status'] === 'active' ? 'Suspend' : 'Activate'; ?>">
+
+                                                    <div class="block-container">
+                                                        <div class="activation icon">
+                                                            <i class="bi bi-<?php echo $area['status'] === 'active' ? 'pause' : 'play'; ?>"></i>
+                                                        </div>
+                                                        <div class="activation text">
+                                                            <?php echo $area['status'] === 'active' ? 'Suspend' : 'Activate'; ?>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="deletion">
+                                                <a href="#" class="btn-delete"
+                                                    data-id="<?php echo $area['id']; ?>"
+                                                    data-name="<?php echo clean($area['area_name']); ?>">
+                                                    <div class="block-container">
+                                                        <div class="deletion icon">
+                                                            <i class="bi bi-trash"></i>
+                                                        </div>
+                                                        <div class="deletion text">
+                                                            Delete
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -302,9 +338,44 @@ $areas = $result['data'];
     </div>
 </div>
 
+<script src="../../assets/js/action.js"></script>
+
 <?php 
 $extraScripts = <<<'SCRIPT'
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form');
+    if (!form) return;
+
+    var searchInput = form.querySelector('input[name="search"]');
+    var filterSelects = form.querySelectorAll('select');
+
+    // Longer debounce
+    var autoSubmit = App.debounce(function() {
+        form.submit();
+    }, 800);
+
+    if (searchInput) {
+        searchInput.focus();
+
+        // Move cursor to end safely
+        setTimeout(function(){
+            var valueLength = searchInput.value.length;
+            searchInput.setSelectionRange(valueLength, valueLength);
+        }, 0);
+
+        searchInput.addEventListener('input', function() {
+            autoSubmit();
+        });
+    }
+
+    filterSelects.forEach(function(select) {
+        select.addEventListener('change', function() {
+            form.submit(); // no need debounce for selects
+        });
+    });
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const modal = new bootstrap.Modal(document.getElementById('areaModal'));
     const form = document.getElementById('areaForm');

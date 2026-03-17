@@ -199,23 +199,60 @@ $areas = $db->fetchAll("SELECT id, area_name FROM installation_areas WHERE statu
                                 <?php echo number_format($inst['latitude'], 4); ?>,
                                 <?php echo number_format($inst['longitude'], 4); ?>
                             </small>
+            
                         </td>
                         <td><?php echo statusBadge($inst['status']); ?></td>
                         <td class="text-center">
-                            <div class="btn-group btn-group-sm">
-                                <a href="view.php?id=<?php echo $inst['id']; ?>" class="btn btn-outline-primary" title="View">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="map.php?id=<?php echo $inst['id']; ?>" class="btn btn-outline-success" title="Map">
-                                    <i class="bi bi-geo-alt"></i>
-                                </a>
-                                <?php if (in_array($currentRole, ['super_admin', 'user_1']) && $inst['status'] === 'submitted'): ?>
-                                <button type="button" class="btn btn-outline-warning btn-review" 
-                                        data-id="<?php echo $inst['id']; ?>" title="Review">
-                                    <i class="bi bi-check2-square"></i>
-                                </button>
-                                <?php endif; ?>
-                            </div>
+                                <div class="action-btn">
+                                    <a href="#" class="menu-toggle" style="font-size:1.5rem;text-decoration:none;color:#000;">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </a>
+                                        <div class="action-dropdown">
+                                            <div class="view-container">
+                                                <a href="view.php?id=<?php echo $inst['id']; ?>" class="btn-view" 
+                                                    title="View">
+                                                    <div class="block-container">
+                                                        <div class="view icon">
+                                                            <i class="bi bi-eye"></i>
+                                                        </div>
+                                                        <div class="view text">
+                                                            View
+                                                        </div>                                                 
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="map">
+                                                <a href="map.php?id=<?php echo $inst['id']; ?>" class="btn-map" 
+                                                    title="Map ">
+                                                    <div class="block-container">
+                                                        <div class="map icon">
+                                                            <i class="bi bi-geo-alt"></i>
+                                                        </div>
+                                                        <div class="map text">
+                                                            Map
+                                                        </div>
+                                                    </div>
+                                                </a>    
+                                            </div>
+                                                <?php if (in_array($currentRole, ['super_admin', 'user_1']) && $inst['status'] === 'submitted'): ?>                                    
+                                                    <div class="delete">
+                                                        <a href="#" class="btn-review" 
+                                                            data-id="<?php echo $inst['id']; ?>"
+                                                            data-name="<?php echo clean($inst['category_name']); ?>">
+                                                            <div class="block-container">
+                                                                <div class="review icon">
+                                                                    <i class="bi bi-check2-square"></i>
+                                                                </div>
+                                                                <div class="review text">
+                                                                    Review
+                                                                </div>
+                                                            </div>
+                                                        </a>                                        
+                                                    </div>
+                                            <?php endif; ?>
+                                        </div>  
+                                    </div>
+                                </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -236,6 +273,8 @@ $areas = $db->fetchAll("SELECT id, area_name FROM installation_areas WHERE statu
         </div>
     </div>
     <?php endif; ?>
+
+    <script src="../../assets/js/action.js"></script>
 </div>
 
 <?php require_once '../../includes/footer.php'; ?>

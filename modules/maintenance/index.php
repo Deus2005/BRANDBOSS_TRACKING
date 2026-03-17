@@ -323,6 +323,39 @@ $maintenanceUsers = $db->fetchAll("SELECT id, full_name FROM users WHERE role = 
 <?php 
 $extraScripts = <<<'SCRIPT'
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form');
+    if (!form) return;
+
+    var searchInput = form.querySelector('input[name="search"]');
+    var filterSelects = form.querySelectorAll('select');
+
+    // Longer debounce
+    var autoSubmit = App.debounce(function() {
+        form.submit();
+    }, 800);
+
+    if (searchInput) {
+        searchInput.focus();
+
+        // Move cursor to end safely
+        setTimeout(function(){
+            var valueLength = searchInput.value.length;
+            searchInput.setSelectionRange(valueLength, valueLength);
+        }, 0);
+
+        searchInput.addEventListener('input', function() {
+            autoSubmit();
+        });
+    }
+
+    filterSelects.forEach(function(select) {
+        select.addEventListener('change', function() {
+            form.submit(); // no need debounce for selects
+        });
+    });
+});
+
 const assignModal = new bootstrap.Modal(document.getElementById('assignModal'));
 
 document.querySelectorAll('.btn-assign').forEach(btn => {

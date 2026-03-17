@@ -172,22 +172,30 @@ if (in_array($role, ['super_admin', 'user_1'])) {
 
         <div class="col-6 graph col-lg-3">
             <div class="card donut-card" id="donutChart" >
-                <div class="donut-hole" style="background: #35EB97; border: 15px solid #ffffff;">       
-                        <div class="stock-info">
-                            <br>
-                            <h3 style="color: #ffffff; font-weight: bold;"><?php echo number_format($stats['total_stock']); ?></h3>
-                            <p style="color: #ffffff; font-weight: bold; font-size: 11px;">Total Stock</p>
+                <div class="donut-hole" style="background: #35EB97; border: 15px solid #ffffff; display: block;">  
+                       
+                    <div class="stock-info" style="margin-top: 1rem;">
+                        <h3 class="stock-value" style="color: #ffffff; font-weight: bold;"><?php echo number_format($stats['total_stock']); ?></h3>
+                    </div>
+                    <div class="stock-icon sad">
+                        <div class="lign" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="text" style="margin-right: 0.5rem; display:flex; align-items:center; justify-content:center;">
+                                <p style="color: #ffffff; font-weight: bold; font-size: 11px; margin:0;">
+                                    Total Stock
+                                </p>  
+                            </div>
+                            <div class="icon" style="align-items: center;">
+                                <i class="bi bi-stack stock-icon" style="font-size: 27px; color: #ffffff; "></i> 
+                            </div>                            
                         </div>
-                        <div class="stock-icon">
-                            <i class="bi bi-stack" style="font-size: 27px; color: #ffffff;"></i>
-                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <script>
-            const max = 1000; // max value
-            const targetValue = <?php echo number_format($stats['total_stock']); ?>;
+            const max = 1000000; // max value
+            const targetValue = <?php echo $stats['total_stock']; ?>;
 
             let currentValue = 0;
 
@@ -216,8 +224,17 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             }
 
             function animateDonut(){
+                var speed = 0; // lower = faster animation
 
-                const speed = 10; // lower = faster animation
+                if (targetValue < 1000) {
+                    speed = 100;
+                } else if (targetValue < 10000) {
+                    speed = 300;
+                } else if (targetValue < 100000) {
+                    speed = 1500;
+                } else {
+                    speed = 2000;
+                }   
 
                 const interval = setInterval(() => {
                     currentValue += speed;
@@ -235,7 +252,14 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             animateDonut();     
         </script>
     </div>
-    
+        
+<script src="https://cdn.jsdelivr.net/npm/fitty"></script>
+
+<script>
+    fitty('.stock-value', { minSize: 10, maxSize: 20 });
+    fitty('.stock-icon', { minSize: 10, maxSize: 20 });
+</script>
+
     <?php elseif ($role === 'user_2'): ?>
     <!-- Installer Stats -->
     <div class="col-6 col-lg-3">
