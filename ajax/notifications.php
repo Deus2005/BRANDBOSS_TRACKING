@@ -11,7 +11,7 @@ header('Content-Type: application/json');
 
 $auth = Auth::getInstance();
 
-if (!$auth->isLoggedIn()) {
+if (!$auth->isLoggedIn()) { 
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
     exit;
 }
