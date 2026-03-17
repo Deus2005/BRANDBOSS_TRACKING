@@ -180,30 +180,72 @@ $canCreate = in_array($currentRole, ['super_admin', 'user_1']);
                         </td>
                         <td>
                             <?php 
-                            echo formatDate($assign['due_date']);
-                            if ($assign['status'] !== 'completed' && strtotime($assign['due_date']) < time()) {
-                                echo ' <span class="badge bg-danger">Overdue</span>';
-                            }
+                                echo formatDate($assign['due_date']);
+
+                                if ($assign['status'] !== 'completed' && strtotime($assign['due_date']) < time()) {
+
+                                    $dueDate = strtotime($assign['due_date']);
+                                    $graceEnd = strtotime('+3 days', $dueDate);
+                                    $daysLeft = ceil(($graceEnd - time()) / (60 * 60 * 24));
+
+                                    if ($daysLeft > 0) {
+                                        echo ' <span class="badge bg-danger">Overdue</span>';
+                                        echo '<br><span style="font-size: 0.8em;color: #5d5d5d9d">closes in '.$daysLeft.' day'.($daysLeft > 1 ? 's' : '').'</span>';
+                                    } else {
+                                        echo ' <span class="badge bg-dark">Closed</span>';
+                                    }
+                                }
                             ?>
                         </td>
                         <td><?php echo priorityBadge($assign['priority']); ?></td>
                         <td><?php echo statusBadge($assign['status']); ?></td>
                         <td class="text-center">
-                            <div class="btn-group btn-group-sm">
-                                <a href="view.php?id=<?php echo $assign['id']; ?>" class="btn btn-outline-primary" title="View">
-                                    <i class="bi bi-eye"></i>
+                            <div class="action-btn">
+                                <a href="#" class="menu-toggle" style="font-size:1.5rem;text-decoration:none;color:#000;">
+                                    <i class="bi bi-three-dots-vertical"></i>
                                 </a>
-                                <?php if ($currentRole === 'user_2' && in_array($assign['status'], ['pending', 'in_progress'])): ?>
-                                <a href="../installations/create.php?assignment_id=<?php echo $assign['id']; ?>" 
-                                   class="btn btn-outline-success" title="Install">
-                                    <i class="bi bi-camera"></i>
-                                </a>
-                                <?php endif; ?>
-                                <?php if ($canCreate && $assign['status'] === 'pending'): ?>
-                                <a href="edit.php?id=<?php echo $assign['id']; ?>" class="btn btn-outline-secondary" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <?php endif; ?>
+                                <div class="action-dropdown">
+                                    <div class="view-container">
+                                        <a href="view.php?id=<?php echo $assign['id']; ?>" class="btn-view" >
+                                            <div class="block-container">
+                                                <div class="view icon">
+                                                    <i class="bi bi-eye"></i>
+                                                </div>
+                                                <div class="edit text">
+                                                    View
+                                                </div>                                                 
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <?php if ($currentRole === 'user_2' && in_array($assign['status'], ['pending', 'in_progress'])): ?>
+                                    <div class="install-container">
+                                        <a href="../installations/create.php?assignment_id=<?php echo $assign['id']; ?>" class="btn-edit">
+                                            <div class="block-container">
+                                                <div class="install icon">
+                                                    <i class="bi bi-camera"></i>
+                                                </div>
+                                                <div class="install text">
+                                                    Installation
+                                                </div>
+                                            </div>
+                                        </a>    
+                                    </div>
+                                    <?php endif; ?>      
+                                    <?php if ($canCreate && $assign['status'] === 'pending'): ?>                       
+                                    <div class="stock-container">
+                                        <a href="edit.php?id=<?php echo $assign['id']; ?>" class="btn-stock" class="btn-stock">
+                                            <div class="block-container">
+                                                <div class="stock icon">
+                                                    <i class="bi bi-pencil"></i>
+                                                </div>
+                                                <div class="stock text">
+                                                    Edit
+                                                </div>
+                                            </div>
+                                        </a>                                        
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -227,4 +269,44 @@ $canCreate = in_array($currentRole, ['super_admin', 'user_1']);
     <?php endif; ?>
 </div>
 
-<?php require_once '../../includes/footer.php'; ?>
+<script src="../../assets/js/action.js"></script>
+<?php 
+$extraScripts = <<<'SCRIPT'
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form');
+    if (!form) return;
+
+    var searchInput = form.querySelector('input[name="search"]');
+    var filterSelects = form.querySelectorAll('select');
+
+    // Longer debounce
+    var autoSubmit = App.debounce(function() {
+        form.submit();
+    }, 800);
+
+    if (searchInput) {
+        searchInput.focus();
+
+        // Move cursor to end safely
+        setTimeout(function(){
+            var valueLength = searchInput.value.length;
+            searchInput.setSelectionRange(valueLength, valueLength);
+        }, 0);
+
+        searchInput.addEventListener('input', function() {
+            autoSubmit();
+        });
+    }
+
+    filterSelects.forEach(function(select) {
+        select.addEventListener('change', function() {
+            form.submit(); // no need debounce for selects
+        });
+    });
+});
+</script>
+SCRIPT;
+
+require_once '../../includes/footer.php'; 
+?>

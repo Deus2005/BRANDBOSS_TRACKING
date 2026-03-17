@@ -37,7 +37,7 @@ if ($month) {
 }
 
 if ($overdue === '1') {
-    $where[] = "isc.status = 'pending' AND isc.scheduled_date <= CURDATE()";
+    $where[] = "isc.status = 'pending' AND isc.scheduled_date <= CURDATE()"; 
 }
 
 $whereClause = implode(' AND ', $where);
@@ -150,9 +150,6 @@ $totalCompleted = $db->count('inspection_schedules', "status = 'completed'");
                 </div>
             </div>
             <div class="col-md-4">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Filter
-                </button>
                 <a href="index.php" class="btn btn-outline-secondary">
                     <i class="bi bi-x-lg"></i> Clear
                 </a>
@@ -170,7 +167,7 @@ $totalCompleted = $db->count('inspection_schedules', "status = 'completed'");
                     <tr>
                         <th>Installation</th>
                         <th>Area</th>
-                        <th class="text-center">Month</th>
+                        <th class="text-center" style="display: none;">Month</th>
                         <th>Scheduled</th>
                         <th>Status</th>
                         <th class="text-center">Actions</th>
@@ -200,10 +197,10 @@ $totalCompleted = $db->count('inspection_schedules', "status = 'completed'");
                             <?php echo clean($sched['area_name']); ?>
                             <br><small class="text-muted"><?php echo clean($sched['city']); ?></small>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center" style="display: none;">
                             <span class="badge bg-primary fs-6">
                                 <?php echo $sched['month_number']; ?>/6
-                            </span>
+                            </span> 
                         </td>
                         <td>
                             <?php echo formatDate($sched['scheduled_date']); ?>
@@ -213,25 +210,54 @@ $totalCompleted = $db->count('inspection_schedules', "status = 'completed'");
                         </td>
                         <td><?php echo statusBadge($sched['status']); ?></td>
                         <td class="text-center">
-                            <div class="btn-group btn-group-sm">
-                                <?php if ($sched['inspection_report_id']): ?>
-                                <a href="view.php?id=<?php echo $sched['inspection_report_id']; ?>" 
-                                   class="btn btn-outline-primary" title="View Report">
-                                    <i class="bi bi-eye"></i>
+                            <div class="action-btn">
+                                <a href="#" class="menu-toggle" style="font-size:1.5rem;text-decoration:none;color:#000;">
+                                    <i class="bi bi-three-dots-vertical"></i>
                                 </a>
-                                <?php endif; ?>
-                                
-                                <?php if (in_array($sched['status'], ['pending', 'scheduled']) && $auth->can('inspections')): ?>
-                                <a href="create.php?schedule_id=<?php echo $sched['id']; ?>" 
-                                   class="btn btn-outline-success" title="Conduct Inspection">
-                                    <i class="bi bi-clipboard-check"></i>
-                                </a>
-                                <?php endif; ?>
-                                
-                                <a href="map.php?lat=<?php echo $sched['latitude']; ?>&lng=<?php echo $sched['longitude']; ?>" 
-                                   class="btn btn-outline-info" title="View Location">
-                                    <i class="bi bi-geo-alt"></i>
-                                </a>
+                                <div class="action-dropdown">
+                                    <?php if ($sched['inspection_report_id']): ?>
+                                    <div class="edit-container">
+                                        <a href="view.php?id=<?php echo $sched['inspection_report_id']; ?>" class="btn-report" title="View Report">
+                                            <div class="block-container">
+                                                <div class="view icon">
+                                                    <i class="bi bi-eye"></i>
+                                                </div>
+                                                <div class="view text">
+                                                    View Report
+                                                </div>                                                 
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if (in_array($sched['status'], ['pending', 'scheduled']) && $auth->can('inspections')): ?>
+                                    <div class="activiation">
+                                        <a href="create.php?schedule_id=<?php echo $sched['id']; ?>" class="btn-toggle" 
+                                            title="Conduct Inspection">
+                                            <div class="block-container">
+                                                <div class="activation icon">
+                                                    <i class="bi bi-clipboard-check"></i>
+                                                </div>
+                                                <div class="activation text">
+                                                    Conduct Inspection
+                                                </div>
+                                            </div>
+                                        </a>    
+                                    </div>
+                                    <?php endif; ?>                              
+                                    <div class="delete">
+                                        <a href="map.php?lat=<?php echo $sched['latitude']; ?>&lng=<?php echo $sched['longitude']; ?>" 
+                                        class="btn-map" title="View Location">
+                                            <div class="block-container">
+                                                <div class="map icon">
+                                                    <i class="bi bi-geo-alt"></i>
+                                                </div>
+                                                <div class="map text">
+                                                    Map
+                                                </div>
+                                            </div>
+                                        </a>                                        
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -241,7 +267,7 @@ $totalCompleted = $db->count('inspection_schedules', "status = 'completed'");
             </table>
         </div>
     </div>
-    
+
     <?php if ($result['total_pages'] > 1): ?>
     <div class="card-footer">
         <div class="d-flex justify-content-between align-items-center">
@@ -255,4 +281,52 @@ $totalCompleted = $db->count('inspection_schedules', "status = 'completed'");
     <?php endif; ?>
 </div>
 
-<?php require_once '../../includes/footer.php'; ?>
+<script src="../../assets/js/action.js"></script>
+<?php 
+$extraScripts = <<<'SCRIPT'
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form');
+    if (!form) return;
+
+    var searchInput = form.querySelector('input[name="search"]');
+    var filterSelects = form.querySelectorAll('select');
+    var overdueCheckbox = form.querySelector('input[name="overdue"]');
+
+    // Debounce for typing
+    var autoSubmit = App.debounce(function() {
+        form.submit();
+    }, 800);
+
+    if (searchInput) {
+        searchInput.focus();
+
+        setTimeout(function(){
+            var valueLength = searchInput.value.length;
+            searchInput.setSelectionRange(valueLength, valueLength);
+        }, 0);
+
+        searchInput.addEventListener('input', function() {
+            autoSubmit();
+        });
+    }
+
+    // Select filters
+    filterSelects.forEach(function(select) {
+        select.addEventListener('change', function() {
+            form.submit();
+        });
+    });
+
+    // Overdue checkbox
+    if (overdueCheckbox) {
+        overdueCheckbox.addEventListener('change', function() {
+            form.submit();
+        });
+    }
+});
+</script>
+SCRIPT;
+
+require_once '../../includes/footer.php'; 
+?>
