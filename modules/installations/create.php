@@ -58,6 +58,8 @@ if ($assignmentId) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
     $latitude = floatval($_POST['latitude'] ?? 0);
     $longitude = floatval($_POST['longitude'] ?? 0);
+    $Mnl_latitude = floatval($_POST['Mnl_latitude'] ?? 0);
+    $Mnl_longitude = floatval($_POST['Mnl_longitude'] ?? 0);
     $installationDate = $_POST['installation_date'] ?? date('Y-m-d');
     $overallRemarks = clean($_POST['overall_remarks'] ?? '');
 
@@ -153,6 +155,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                 'installation_date' => $installationDate,
                 'latitude' => $latitude,
                 'longitude' => $longitude,
+                'Mnl_latitude' => $Mnl_latitude,
+                'Mnl_longitude' => $Mnl_longitude,
                 'location_address' => $selectedAssignment['address'],
                 'overall_remarks' => $overallRemarks,
                 'status' => 'submitted'
@@ -483,6 +487,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                     </div>
                     
                     <div id="gps-error" class="alert alert-danger py-2" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="card mb-2">
+                <div class="card-header bg-primary">
+                    <i class="bi bi-geo-alt me-2"></i>GPS Location
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="latitude" class="form-label">Latitude</label>
+                        <input type="text" class="form-control" id="latitude" name="Mnl_latitude" placeholder="Enter latitude" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="longitude" class="form-label">Longitude</label>
+                        <input type="text" class="form-control" id="longitude" name="Mnl_longitude" placeholder="Enter longitude" required>
+                    </div>
                 </div>
             </div>
             
