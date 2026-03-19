@@ -171,18 +171,27 @@ function uploadImage(array $file, string $destination, ?float $lat = null, ?floa
  * Add GPS watermark to image
  */
 function addGpsWatermark(string $filepath, float $lat, float $lng): bool {
+    // If GD is not available, skip watermarking gracefully.
+    // This prevents fatal errors like "Call to undefined function imagecreatefrompng()".
+    if (!extension_loaded('gd')) {
+        return false;
+    }
+
     $ext = strtolower(pathinfo($filepath, PATHINFO_EXTENSION));
     
     // Load image based on type
     switch ($ext) {
         case 'jpg':
         case 'jpeg':
+            if (!function_exists('imagecreatefromjpeg')) return false;
             $image = imagecreatefromjpeg($filepath);
             break;
         case 'png':
+            if (!function_exists('imagecreatefrompng')) return false;
             $image = imagecreatefrompng($filepath);
             break;
         case 'webp':
+            if (!function_exists('imagecreatefromwebp')) return false;
             $image = imagecreatefromwebp($filepath);
             break;
         default:
@@ -240,12 +249,15 @@ function addGpsWatermark(string $filepath, float $lat, float $lng): bool {
     switch ($ext) {
         case 'jpg':
         case 'jpeg':
+            if (!function_exists('imagejpeg')) return false;
             imagejpeg($image, $filepath, 90);
             break;
         case 'png':
+            if (!function_exists('imagepng')) return false;
             imagepng($image, $filepath);
             break;
         case 'webp':
+            if (!function_exists('imagewebp')) return false;
             imagewebp($image, $filepath, 90);
             break;
     }

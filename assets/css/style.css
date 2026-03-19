@@ -85,11 +85,9 @@ aside{
     height:100vh;
     overflow-y:auto;
 }
-
 /* ========================================
    LOGIN PAGE
-======================================== */
-
+======================================== */     
 .signin-wrapper {
     display: flex;
     justify-content: center;      
@@ -284,6 +282,7 @@ input[type="password"]::-ms-reveal {
 .signin-footer strong {
     color: var(--primary);
 }
+
 
 
 /* ========================================
@@ -506,7 +505,6 @@ input[type="password"]::-ms-reveal {
     text-decoration: none; 
 }
 
-
 /* User Dropdown */
 
 .user-dropdown {
@@ -532,6 +530,7 @@ input[type="password"]::-ms-reveal {
 .user-avatar {
     width: 36px;
     height: 36px;
+    background: var(--primary);
     color: var(--text-white);
     border-radius: 50%;
     display: flex;
@@ -558,7 +557,6 @@ input[type="password"]::-ms-reveal {
 
 
 /* Notifications */
-
 .notification-btn {
     position: relative;
     background: none;
@@ -733,6 +731,7 @@ input[type="password"]::-ms-reveal {
     padding: 1.5rem;
 }
 
+
 /* ========================================
    CARDS
 ======================================== */
@@ -771,53 +770,6 @@ input[type="password"]::-ms-reveal {
     padding: 1rem 1.25rem;
 }
 
-.card-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: center;
-    justify-content: center;
-}
-
-.donut-hole {
-    border-radius: 50%;
-    width: 150px;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-}
-
-.donut-hole {
-    border-radius: 50%;
-    width: 150px;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
-}
-
-.donut-card {
-    border-radius: 50%;
-    width: 250px;
-    height: 250px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    background: var(--bg-white);
-    box-shadow: var(--shadow-sm);
-}
-
-.graph {
-    width: 250px;
-    height: 250px;
-    border-radius: 5px;
-    overflow: hidden;
-}
-
 /* Stats Cards */
 
 .stats-card {
@@ -850,8 +802,8 @@ input[type="password"]::-ms-reveal {
 }
 
 .stats-icon {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     background: var(--primary-light);
     color: var(--primary);
     border-radius: 0.75rem;

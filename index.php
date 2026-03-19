@@ -166,91 +166,19 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
 
-        <?php 
-
-        ?>
-
-        <div class="col-6 graph col-lg-3">
-            <div class="card donut-card" id="donutChart" >
-                <div class="donut-hole" style="background: #35EB97; border: 15px solid #ffffff; display: block;">  
-                       
-                    <div class="stock-info" style="margin-top: 1rem;">
-                        <h3 class="stock-value" style="color: #ffffff; font-weight: bold;"><?php echo number_format($stats['total_stock']); ?></h3>
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card" style="border-left-color: #198754;">
+                <div class="card-body">
+                    <div class="stats-info">
+                        <h3 style="color: #198754;"><?php echo number_format($stats['total_stock']); ?></h3>
+                        <p>Total Stock</p>
                     </div>
-                    <div class="stock-icon sad">
-                        <div class="lign" style="display: flex; align-items: center; justify-content: space-between;">
-                            <div class="text" style="margin-right: 0.5rem; display:flex; align-items:center; justify-content:center;">
-                                <p style="color: #ffffff; font-weight: bold; font-size: 11px; margin:0;">
-                                    Total Stock
-                                </p>  
-                            </div>
-                            <div class="icon" style="align-items: center;">
-                                <i class="bi bi-stack stock-icon" style="font-size: 27px; color: #ffffff; "></i> 
-                            </div>                            
-                        </div>
+                    <div class="stats-icon" style="background: #d1e7dd; color: #198754;">
+                        <i class="bi bi-stack"></i>
                     </div>
                 </div>
             </div>
         </div>
-
-        <script>
-            const max = 1000000; // max value
-            const targetValue = <?php echo $stats['total_stock']; ?>;
-
-            let currentValue = 0;
-
-            function drawDonut(value){
-
-                const data = [
-                    { value: value, color: "#198754" },
-                    { value: max - value, color: "#ffffff" },
-                ];
-
-                const total = data.reduce((sum, d) => sum + d.value, 0);
-
-                let start = 0;
-                let parts = [];
-
-                data.forEach(d => {
-                    const angle = (d.value / total) * 360;
-                    const end = start + angle;
-
-                    parts.push(`${d.color} ${start}deg ${end}deg`);
-                    start = end;
-                });
-
-                document.getElementById("donutChart").style.background =
-                    `conic-gradient(${parts.join(",")})`;
-            }
-
-            function animateDonut(){
-                var speed = 0; // lower = faster animation
-
-                if (targetValue < 1000) {
-                    speed = 100;
-                } else if (targetValue < 10000) {
-                    speed = 300;
-                } else if (targetValue < 100000) {
-                    speed = 1500;
-                } else {
-                    speed = 2000;
-                }   
-
-                const interval = setInterval(() => {
-                    currentValue += speed;
-
-                    if(currentValue >= targetValue){
-                        currentValue = targetValue;
-                        clearInterval(interval);
-                    }
-
-                    drawDonut(currentValue);
-
-                }, 10);
-            }
-
-            animateDonut();     
-        </script>
     </div>
         
 <script src="https://cdn.jsdelivr.net/npm/fitty"></script>

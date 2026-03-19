@@ -140,7 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
         }
     }
     
-    if (empty($errors)) {
+    
+
+    if ($errors === []) {
         try {
             $db->beginTransaction();
             
@@ -370,8 +372,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
             $db->commit();
             redirect('index.php', 'Installation report submitted successfully!', 'success');
             
-        } catch (Exception $e) {
-            $db->rollback();
+        } catch (Throwable $e) {
+            try {
+                if ($db->getConnection()->inTransaction()) {
+                    $db->rollback();
+                }
+            } catch (Throwable $rollbackError) {
+                // ignore rollback errors; we'll log the original exception below
+            }
+
+            error_log('Installation submit failed: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
             $errors['general'] = 'Failed to submit report: ' . $e->getMessage();
         }
     }
@@ -436,7 +446,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
     <input type="hidden" name="assignment_id" value="<?php echo $assignmentId; ?>">
     <input type="hidden" name="latitude" id="latitude" value="">
     <input type="hidden" name="longitude" id="longitude" value="">
-    
+    <div id="gps-error" class="alert alert-danger py-2" style="display: none;"></div>
     <div class="row">
         <!-- Assignment Info & GPS -->
         <div class="col-lg-4 mb-4">
@@ -451,7 +461,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                     <p class="mb-0"><strong>Address:</strong> <?php echo clean($selectedAssignment['address']) ?: '-'; ?></p>
                 </div>
             </div>
-            
             <div class="card mb-3">
                 <div class="card-header bg-primary">
                     <i class="bi bi-geo-alt me-2"></i>GPS Location
@@ -482,7 +491,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                         </button>
                     </div>
                     
-                    <div id="gps-error" class="alert alert-danger py-2" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="card mb-2">
+                <div class="card-header bg-primary">
+                    <i class="bi bi-geo-alt me-2"></i>Manual Coordinates (Optional)
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="mnl_latitude" class="form-label">Latitude</label>
+                        <input type="text" class="form-control" id="mnl_latitude" name="Mnl_latitude" placeholder="Enter latitude">
+                    </div>
+                    <div class="mb-3">
+                        <label for="mnl_longitude" class="form-label">Longitude</label>
+                        <input type="text" class="form-control" id="mnl_longitude" name="Mnl_longitude" placeholder="Enter longitude">
+                    </div>
                 </div>
             </div>
             

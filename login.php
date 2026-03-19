@@ -178,7 +178,7 @@ $remaining = ($lockUntil > time()) ? $lockUntil - time() : 0;
         <div class="signin-wrapper">
             <div class="signin-container">
                 <div class="signin-image">
-                    <img src="images/logo-icon.png" alt="<?php echo APP_NAME; ?>">
+                    <img src="images/Logo-bg.png" alt="<?php echo APP_NAME; ?>">
                 </div>
 
                 <div class="signin-body">
