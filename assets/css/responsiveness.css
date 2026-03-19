@@ -1,7 +1,9 @@
 /* ===============================
    LOGIN PAGE RESPONSIVENESS
 ================================= */
-@media (max-width: 1024px) {
+
+/* Tablet Responsive */
+@media (max-width: 1024px) { 
     .signin-container {
         flex-direction: column;      
         padding: 1.5rem;             
@@ -30,6 +32,8 @@
     }
 }
 
+/* Mobile Responsive */
+/* Mobile Responsive */
 @media (max-width: 768px) {
     .signin-wrapper {
         padding: 0.5rem;
