@@ -58,6 +58,8 @@ if ($assignmentId) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
     $latitude = floatval($_POST['latitude'] ?? 0);
     $longitude = floatval($_POST['longitude'] ?? 0);
+    $mnl_latitude = floatval($_POST['mnl_latitude'] ?? 0);
+    $mnl_longitude = floatval($_POST['mnl_longitude'] ?? 0);
     $installationDate = $_POST['installation_date'] ?? date('Y-m-d');
     $overallRemarks = clean($_POST['overall_remarks'] ?? '');
 
@@ -98,6 +100,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
     // Validation
     if ($latitude == 0 || $longitude == 0) {
         $errors['gps'] = 'GPS location is required. Please enable location services.';
+    }
+
+    if($latitude != $mnl_latitude || $longitude != $mnl_longitude) {
+        $errors['mnl_gps'] = 'GPS location is required. Please enable location services.';
+    } else {
+        unset($errors['mnl_gps']);
     }
 
     if (empty($itemData)) {
@@ -155,6 +163,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                 'installation_date' => $installationDate,
                 'latitude' => $latitude,
                 'longitude' => $longitude,
+                'mnl_latitude' => $mnl_latitude,
+                'mnl_longitude' => $mnl_longitude,
                 'location_address' => $selectedAssignment['address'],
                 'overall_remarks' => $overallRemarks,
                 'status' => 'submitted'
@@ -499,13 +509,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                     <i class="bi bi-geo-alt me-2"></i>Manual Coordinates (Optional)
                 </div>
                 <div class="card-body">
+                    <?php if (isset($errors['mnl_gps'])): ?>
+                        <div class="alert alert-danger py-2"><?php echo $errors['mnl_gps']; ?></div>
+                    <?php endif; ?>
                     <div class="mb-3">
                         <label for="mnl_latitude" class="form-label">Latitude</label>
-                        <input type="text" class="form-control" id="mnl_latitude" name="Mnl_latitude" placeholder="Enter latitude">
+                        <input type="text" class="form-control" id="mnl_latitude" name="mnl_latitude" placeholder="Enter latitude">
                     </div>
                     <div class="mb-3">
                         <label for="mnl_longitude" class="form-label">Longitude</label>
-                        <input type="text" class="form-control" id="mnl_longitude" name="Mnl_longitude" placeholder="Enter longitude">
+                        <input type="text" class="form-control" id="mnl_longitude" name="mnl_longitude" placeholder="Enter longitude">
                     </div>
                 </div>
             </div>

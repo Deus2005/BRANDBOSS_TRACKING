@@ -121,73 +121,64 @@ if (in_array($role, ['super_admin', 'user_1'])) {
 
 <!-- Statistics Cards -->
 <div class="row g-3 mb-4">
-    <div class="card-container">
-        <?php if (in_array($role, ['super_admin', 'user_1'])): ?>
-        <!-- Manager/Admin Stats -->
-        <div class="col-6 col-lg-3">
-            <div class="card stats-card">
-                <div class="card-body">
-                    <div class="stats-info">
-                        <h3><?php echo number_format($stats['total_items']); ?></h3>
-                        <p>Inventory Items</p>
-                    </div>
-                    <div class="stats-icon">
-                        <i class="bi bi-box-seam"></i>
-                    </div>
+    <?php if (in_array($role, ['super_admin', 'user_1'])): ?>
+    <!-- Manager/Admin Stats -->
+    <div class="col-6 col-lg-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <div class="stats-info">
+                    <h3><?php echo number_format($stats['total_items']); ?></h3>
+                    <p>Inventory Items</p>
+                </div>
+                <div class="stats-icon">
+                    <i class="bi bi-box-seam"></i>
                 </div>
             </div>
         </div>
-        
-        <div class="col-6 col-lg-3">
-            <div class="card stats-card" style="border-left-color: #0d6efd;">
-                <div class="card-body">
-                    <div class="stats-info">
-                        <h3 style="color: #0d6efd;"><?php echo $stats['ongoing_assignments']; ?></h3>
-                        <p>Ongoing Assignments</p>
-                    </div>
-                    <div class="stats-icon" style="background: #cfe2ff; color: #0d6efd;">
-                        <i class="bi bi-clipboard-check"></i>
-                    </div>
+    </div>
+    
+    <div class="col-6 col-lg-3">
+        <div class="card stats-card" style="border-left-color: #198754;">
+            <div class="card-body">
+                <div class="stats-info">
+                    <h3 style="color: #198754;"><?php echo number_format($stats['total_stock']); ?></h3>
+                    <p>Total Stock</p>
+                </div>
+                <div class="stats-icon" style="background: #d1e7dd; color: #198754;">
+                    <i class="bi bi-stack"></i>
                 </div>
             </div>
         </div>
-        
-        <div class="col-6 col-lg-3">
-            <div class="card stats-card" style="border-left-color: #ffc107;">
-                <div class="card-body">
-                    <div class="stats-info">
-                        <h3 style="color: #ffc107;"><?php echo $stats['open_tickets']; ?></h3>
-                        <p>Open Tickets</p>
-                    </div>
-                    <div class="stats-icon" style="background: #fff3cd; color: #ffc107;">
-                        <i class="bi bi-wrench"></i>
-                    </div>
+    </div>
+    
+    <div class="col-6 col-lg-3">
+        <div class="card stats-card" style="border-left-color: #0d6efd;">
+            <div class="card-body">
+                <div class="stats-info">
+                    <h3 style="color: #0d6efd;"><?php echo $stats['ongoing_assignments']; ?></h3>
+                    <p>Ongoing Assignments</p>
+                </div>
+                <div class="stats-icon" style="background: #cfe2ff; color: #0d6efd;">
+                    <i class="bi bi-clipboard-check"></i>
                 </div>
             </div>
         </div>
-
-        <div class="col-6 col-lg-3">
-            <div class="card stats-card" style="border-left-color: #198754;">
-                <div class="card-body">
-                    <div class="stats-info">
-                        <h3 style="color: #198754;"><?php echo number_format($stats['total_stock']); ?></h3>
-                        <p>Total Stock</p>
-                    </div>
-                    <div class="stats-icon" style="background: #d1e7dd; color: #198754;">
-                        <i class="bi bi-stack"></i>
-                    </div>
+    </div>
+    
+    <div class="col-6 col-lg-3">
+        <div class="card stats-card" style="border-left-color: #ffc107;">
+            <div class="card-body">
+                <div class="stats-info">
+                    <h3 style="color: #ffc107;"><?php echo $stats['open_tickets']; ?></h3>
+                    <p>Open Tickets</p>
+                </div>
+                <div class="stats-icon" style="background: #fff3cd; color: #ffc107;">
+                    <i class="bi bi-wrench"></i>
                 </div>
             </div>
         </div>
     </div>
         
-<script src="https://cdn.jsdelivr.net/npm/fitty"></script>
-
-<script>
-    fitty('.stock-value', { minSize: 10, maxSize: 20 });
-    fitty('.stock-icon', { minSize: 10, maxSize: 20 });
-</script>
-
     <?php elseif ($role === 'user_2'): ?>
     <!-- Installer Stats -->
     <div class="col-6 col-lg-3">
