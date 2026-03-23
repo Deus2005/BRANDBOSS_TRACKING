@@ -54,6 +54,10 @@ if ($assignmentId) {
     }
 }
 
+function old($key) {
+    return htmlspecialchars($_POST[$key] ?? '');
+}
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
     $latitude = floatval($_POST['latitude'] ?? 0);
@@ -510,15 +514,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                 </div>
                 <div class="card-body">
                     <?php if (isset($errors['mnl_gps'])): ?>
-                        <div class="alert alert-danger py-2"><?php echo $errors['mnl_gps']; ?></div>
+                        <div class="alert alert-danger py-2"><?php echo $errors['gps']; ?></div>
                     <?php endif; ?>
                     <div class="mb-3">
                         <label for="mnl_latitude" class="form-label">Latitude</label>
-                        <input type="text" class="form-control" id="mnl_latitude" name="mnl_latitude" placeholder="Enter latitude">
+                        <input type="text" class="form-control" id="mnl_latitude" name="mnl_latitude" value="<?= old('mnl_latitude'); ?>" placeholder="Enter latitude">
                     </div>
                     <div class="mb-3">
                         <label for="mnl_longitude" class="form-label">Longitude</label>
-                        <input type="text" class="form-control" id="mnl_longitude" name="mnl_longitude" placeholder="Enter longitude">
+                        <input type="text" class="form-control" id="mnl_longitude" name="mnl_longitude"  value="<?= old('mnl_longitude'); ?>" placeholder="Enter longitude">
                     </div>
                 </div>
             </div>
@@ -531,11 +535,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                     <div class="mb-3">
                         <label for="installation_date" class="form-label">Installation Date</label>
                         <input type="date" class="form-control" id="installation_date" name="installation_date"
-                               value="<?php echo date('Y-m-d'); ?>" max="<?php echo date('Y-m-d'); ?>">
+                               value="<?php echo date('Y-m-d'); ?> <?= old('installation_date'); ?>" max="<?php echo date('Y-m-d'); ?>">
                     </div>
                     <div class="mb-0">
                         <label for="overall_remarks" class="form-label">Overall Remarks</label>
-                        <textarea class="form-control" id="overall_remarks" name="overall_remarks" rows="3"></textarea>
+                        <textarea class="form-control" id="overall_remarks" name="overall_remarks" rows="3"><?= old('overall_remarks') ?></textarea>
                     </div>
                 </div>
             </div>
@@ -557,7 +561,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                         <div class="col-md-6 mb-3">
                             <label for="agency_store_code" class="form-label">Agency Store Code</label>
                             <input type="text" class="form-control" id="agency_store_code" name="agency_store_code"
-                                   placeholder="e.g., AG-MKT-001">
+                                    value="<?= old('agency_store_code'); ?>"  placeholder="e.g., AG-MKT-001">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="date_of_visit" class="form-label">Date of Visit <span class="text-danger">*</span></label>
@@ -571,11 +575,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                             <label for="store_status" class="form-label">Store Status Upon Visit <span class="text-danger">*</span></label>
                             <select class="form-select" id="store_status" name="store_status" required>
                                 <option value="">-- Select Status --</option>
-                                <option value="agree_to_dressup">Agree to Dress-Up</option>
-                                <option value="store_closed">Store Closed</option>
-                                <option value="refused_to_dressup">Refused to Dress-Up</option>
-                                <option value="reschedule">Reschedule</option>
-                                <option value="others">Others</option>
+                                <option value="agree_to_dressup" <?= old('store_status') == 'agree_to_dressup' ? 'selected' : '' ?>>Agree to Dress-Up</option>
+                                <option value="store_closed" <?= old('store_status') == 'store_closed' ? 'selected' : '' ?>>Store Closed</option>
+                                <option value="refused_to_dressup" <?= old('store_status') == 'refused_to_dressup' ? 'selected' : '' ?>>Refused to Dress-Up</option>
+                                <option value="reschedule" <?= old('store_status') == 'reschedule' ? 'selected' : '' ?>>Reschedule</option>
+                                <option value="others" <?= old('store_status') == 'others' ? 'selected' : '' ?>>Others</option>
                             </select>
                         </div>
                     </div>
@@ -583,7 +587,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                     <div class="row" id="reschedule_section" style="display: none;">
                         <div class="col-md-12 mb-3">
                             <label for="reschedule_date" class="form-label">Reschedule Date & Time</label>
-                            <input type="datetime-local" class="form-control" id="reschedule_date" name="reschedule_date">
+                            <input type="datetime-local" class="form-control" id="reschedule_date" value="<?= old('reschedule_date') ?>" name="reschedule_date">
                         </div>
                     </div>
 
@@ -591,7 +595,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                         <div class="col-md-12 mb-3">
                             <label for="status_remarks" class="form-label">Status Remarks <small class="text-muted">(Max 500 characters)</small></label>
                             <textarea class="form-control" id="status_remarks" name="status_remarks"
-                                      rows="3" maxlength="500" placeholder="Provide additional details..."></textarea>
+                                      rows="3" maxlength="500" placeholder="Provide additional details..."><?= old('status_remarks') ?></textarea>
                             <small class="text-muted"><span id="char_count">0</span>/500 characters</small>
                         </div>
                     </div>
@@ -600,12 +604,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                         <div class="col-md-6 mb-3">
                             <label for="store_name_before" class="form-label">Store Name Before</label>
                             <input type="text" class="form-control" id="store_name_before" name="store_name_before"
-                                   placeholder="Original store name">
+                                   value="<?= old('store_name_before') ?>" placeholder="Original store name">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="store_name_after" class="form-label">Store Name After (POS Name in Signage)</label>
                             <input type="text" class="form-control" id="store_name_after" name="store_name_after"
-                                   placeholder="New store name on signage">
+                                   value="<?= old('store_name_after') ?>" placeholder="New store name on signage">
                         </div>
                     </div>
 
@@ -613,12 +617,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                         <div class="col-md-6 mb-3">
                             <label for="owner_name" class="form-label">Owner's Complete Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="owner_name" name="owner_name"
-                                   placeholder="e.g., Juan Dela Cruz" required>
+                                   value="<?= old('owner_name') ?>" placeholder="e.g., Juan Dela Cruz" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="contact_number" class="form-label">Contact Number <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="contact_number" name="contact_number"
-                                   placeholder="0000-000-0000" pattern="[0-9]{4}-[0-9]{3}-[0-9]{4}" required>
+                                   value="<?= old('contact_number') ?>" placeholder="0000-000-0000" pattern="[0-9]{4}-[0-9]{3}-[0-9]{4}" required>
                             <small class="text-muted">Format: 0912-345-6789</small>
                         </div>
                     </div>
@@ -634,45 +638,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                     <div class="row">
                         <div class="col-md-3 mb-3">
                             <label for="house_no" class="form-label">House No.</label>
-                            <input type="text" class="form-control" id="house_no" name="house_no" placeholder="e.g., 123">
+                            <input type="text" class="form-control" id="house_no" name="house_no" value="<?= old('house_no') ?>" placeholder="e.g., 123">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="block" class="form-label">Block</label>
-                            <input type="text" class="form-control" id="block" name="block" placeholder="e.g., B10">
+                            <input type="text" class="form-control" id="block" name="block" value="<?= old('block') ?>" placeholder="e.g., B10">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="lot" class="form-label">Lot</label>
-                            <input type="text" class="form-control" id="lot" name="lot" placeholder="e.g., L5">
+                            <input type="text" class="form-control" id="lot" name="lot" value="<?= old('lot') ?>" placeholder="e.g., L5">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="street_name" class="form-label">Street Name</label>
-                            <input type="text" class="form-control" id="street_name" name="street_name" placeholder="e.g., Mabini St.">
+                            <input type="text" class="form-control" id="street_name" name="street_name" value="<?= old('street_name') ?>" placeholder="e.g., Mabini St.">
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-3 mb-3">
                             <label for="purok" class="form-label">Purok</label>
-                            <input type="text" class="form-control" id="purok" name="purok" placeholder="e.g., Purok 3">
+                            <input type="text" class="form-control" id="purok" name="purok" value="<?= old('purok') ?>" placeholder="e.g., Purok 3">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="sitio" class="form-label">Sitio</label>
-                            <input type="text" class="form-control" id="sitio" name="sitio" placeholder="e.g., Sitio Luntian">
+                            <input type="text" class="form-control" id="sitio" name="sitio" value="<?= old('sitio') ?>" placeholder="e.g., Sitio Luntian">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="zone" class="form-label">Zone</label>
-                            <input type="text" class="form-control" id="zone" name="zone" placeholder="e.g., Zone 1">
+                            <input type="text" class="form-control" id="zone" name="zone" value="<?= old('zone') ?>" placeholder="e.g., Zone 1">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="phase" class="form-label">Phase</label>
-                            <input type="text" class="form-control" id="phase" name="phase" placeholder="e.g., Phase 2">
+                            <input type="text" class="form-control" id="phase" name="phase" value="<?= old('phase') ?>" placeholder="e.g., Phase 2">
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label for="road" class="form-label">Road</label>
-                            <input type="text" class="form-control" id="road" name="road" placeholder="e.g., National Highway">
+                            <input type="text" class="form-control" id="road" name="road" value="<?= old('road') ?>" placeholder="e.g., National Highway">
                         </div>
                     </div>
 
@@ -680,17 +684,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                         <div class="col-md-4 mb-3">
                             <label for="barangay" class="form-label">Barangay <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="barangay" name="barangay"
-                                   placeholder="e.g., Poblacion" required>
+                                   value="<?= old('barangay') ?>" placeholder="e.g., Poblacion" required>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="city" class="form-label">City <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="city" name="city"
-                                   placeholder="e.g., Makati" required>
+                                   value="<?= old('city') ?>" placeholder="e.g., Makati" required>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="province" class="form-label">Province <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="province" name="province"
-                                   placeholder="e.g., Metro Manila" required>
+                                   value="<?= old('province') ?>" placeholder="e.g., Metro Manila" required>
                         </div>
                     </div>
                 </div>
@@ -706,17 +710,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                         <div class="col-md-4 mb-3">
                             <label for="area_length" class="form-label">Area Length (meters)</label>
                             <input type="number" step="0.01" class="form-control" id="area_length" name="area_length"
-                                   placeholder="e.g., 10.5" min="0">
+                                   value="<?= old('area_length') ?>" placeholder="e.g., 10.5" min="0">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="area_width" class="form-label">Area Width (meters)</label>
                             <input type="number" step="0.01" class="form-control" id="area_width" name="area_width"
-                                   placeholder="e.g., 8.0" min="0">
+                                   value="<?= old('area_width') ?>" placeholder="e.g., 8.0" min="0">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="additional_area_sqm" class="form-label">Additional Area (sqm)</label>
                             <input type="number" step="0.01" class="form-control" id="additional_area_sqm" name="additional_area_sqm"
-                                   placeholder="For irregular shapes" min="0">
+                                   value="<?= old('additional_area_sqm') ?>" placeholder="For irregular shapes" min="0">
                             <small class="text-muted">Optional: for L-shaped or irregular areas</small>
                         </div>
                     </div>
