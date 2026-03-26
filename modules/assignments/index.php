@@ -123,9 +123,6 @@ $canCreate = in_array($currentRole, ['super_admin', 'user_1']);
                 </select>
             </div>
             <div class="col-md-4">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Filter
-                </button>
                 <a href="index.php" class="btn btn-outline-secondary">
                     <i class="bi bi-x-lg"></i> Clear
                 </a>

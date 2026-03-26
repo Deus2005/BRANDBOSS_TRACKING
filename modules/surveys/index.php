@@ -170,37 +170,88 @@ $surveys = $result['data'];
                             <div class="text-muted small"><?php echo clean($survey['created_by_name']); ?></div>
                         </td>
                         <td class="text-center">
-                            <div class="btn-group btn-group-sm">
-                                <?php if ($survey['response_count'] > 0): ?>
-                                <a href="results.php?id=<?php echo $survey['id']; ?>" class="btn btn-outline-info" title="View Results">
-                                    <i class="bi bi-graph-up"></i>
+                            <div class="action-btn">
+                                <a href="#" class="menu-toggle" style="font-size:1.5rem;text-decoration:none;color:#000;">
+                                    <i class="bi bi-three-dots-vertical"></i>
                                 </a>
-                                <?php endif; ?>
-                                
-                                <?php if ($survey['status'] !== 'closed'): ?>
-                                <a href="edit.php?id=<?php echo $survey['id']; ?>" class="btn btn-outline-secondary" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <?php endif; ?>
-                                
-                                <?php if ($survey['status'] === 'draft'): ?>
-                                <button type="button" class="btn btn-outline-success btn-publish" 
-                                        data-id="<?php echo $survey['id']; ?>" title="Publish">
-                                    <i class="bi bi-send"></i>
-                                </button>
-                                <?php elseif ($survey['status'] === 'active'): ?>
-                                <button type="button" class="btn btn-outline-danger btn-close-survey" 
-                                        data-id="<?php echo $survey['id']; ?>" title="Close Survey">
-                                    <i class="bi bi-x-circle"></i>
-                                </button>
-                                <?php endif; ?>
-                                
-                                <?php if ($survey['response_count'] == 0): ?>
-                                <button type="button" class="btn btn-outline-danger btn-delete" 
-                                        data-id="<?php echo $survey['id']; ?>" title="Delete">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                                <?php endif; ?>
+                                <div class="action-dropdown">
+                                    <?php if ($survey['response_count'] > 0): ?>
+                                    <div class="edit-container">
+                                        <a href="results.php?id=<?php echo $survey['id']; ?>" title="View Results">
+                                            <div class="block-container">
+                                                <div class="results icon">
+                                                    <i class="bi bi-graph-up"></i>
+                                                </div>
+                                                <div class="results text">
+                                                    ViewResult
+                                                </div>                                                 
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if ($survey['status'] !== 'closed'): ?>
+                                    <div class="edit">
+                                         <a href="edit.php?id=<?php echo $survey['id']; ?>" class="btn-edit" title="Edit">
+                                            <div class="block-container">
+                                                <div class="edit icon">
+                                                   <i class="bi bi-pencil"></i>
+                                                </div>
+                                                <div class="edit text">
+                                                    Edit
+                                                </div>
+                                            </div>
+                                        </a>    
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if ($survey['status'] === 'draft'): ?>
+                                        <div class="publish">
+                                            <a href="#"
+                                                data-id="<?php echo $survey['id']; ?>"
+                                                title="Publish">
+                                            <div class="block-container">
+                                                <div class="publish icon">
+                                                    <i class="bi bi-pencil"></i>
+                                                </div>
+                                                <div class="publish text">
+                                                    Publish
+                                                </div>
+                                            </div>   
+                                            </a>
+                                         
+                                        </div>
+                                        <?php elseif($survey['status'] === 'active'): ?>
+                                            <div class="close">
+                                                <a href="#" data-id="<?php echo $survey['id']; ?>" title="Publish">
+                                                    <div class="block-container">
+                                                        <div class="close icon">
+                                                            <i class="bi bi-x-circle"></i>
+                                                        </div>
+                                                        <div class="close text">
+                                                            Close Survey
+                                                        </div>
+                                                    </div>   
+                                                </a>             
+                                            </div>
+                                    <?php endif; ?>
+                                    <?php if ($survey['response_count'] == 0): ?>                                
+                                    <div class="delete">
+                                        <a href="#" class="btn-delete" 
+                                            data-id="<?php echo $survey['id']; ?>"
+                                            data-name="<?php echo clean($survey['title']); ?>"
+                                            title="Close Survey">
+                                            
+                                            <div class="block-container">
+                                                <div class="delete icon">
+                                                    <i class="bi bi-trash"></i> 
+                                                </div>
+                                                <div class="delete text">
+                                                    Delete
+                                                </div>
+                                            </div>
+                                        </a>                                        
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -223,7 +274,7 @@ $surveys = $result['data'];
     </div>
     <?php endif; ?>
 </div>
-
+<script src="../../assets/js/action.js"></script>
 <?php 
 $extraScripts = <<<'SCRIPT'
 <script>
