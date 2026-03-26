@@ -114,18 +114,40 @@ foreach ($cityBreakdownRows as $row) {
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-
+    
     <link rel="stylesheet" href="assets/css/client.css">
 </head>
+
 <body class="client-body">
     <header class="client-topbar">
         <div class="client-topbar-left">
             <div class="client-welcome"><?php echo $welcomeName; ?></div>
             <div class="client-topbar-sub">BRANDBOSS Tracking Progress</div>
         </div>
-        <button class="client-topbar-dd" type="button" aria-label="Open menu">
-            <i class="bi bi-chevron-down"></i>
-        </button>
+
+        <div class="client-topbar-right dropdown">
+            <button class="client-topbar-dd dropdown-toggle" 
+                    type="button" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false">
+                <i class="bi bi-person-circle"></i>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="change-password.php">
+                        <i class="bi bi-key me-2"></i> Change Password
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item text-danger" 
+                    href="logout.php" 
+                    onclick="return confirm('Are you sure you want to logout?')">
+                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
     </header>
 
     <main class="client-container">
@@ -478,6 +500,7 @@ foreach ($cityBreakdownRows as $row) {
             showOverview();
         })();
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 
