@@ -118,12 +118,23 @@ foreach ($reportItems as $item) {
 // Handle review action
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admin', 'user_1'])) {
     $action = $_POST['action'] ?? '';
-    
+    $checkbox = $_POST['edit_perm'] ?? '';
+    $permission = null;
+    $message = null;
+
     if (in_array($action, ['approve', 'reject'])) {
         $newStatus = $action === 'approve' ? 'approved' : 'rejected';
         
+        if($newStatus === 'rejected') {
+            $permission = $checkbox === 'checked' ? 'Permitted' : 'Not Permitted';
+
+            $reason = $_POST['reject_message'] ?? '';
+            $message = "Reason for rejection: {$reason}";
+        }
+
         $db->update('installation_reports', [
             'status' => $newStatus,
+            'Permission' => $permission,
             'reviewed_by' => $userId,
             'reviewed_at' => date('Y-m-d H:i:s')
         ], 'id = ?', [$installationId]);
@@ -132,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         createNotification(
             $installation['installer_id'],
             'Installation Report ' . ucfirst($newStatus),
-            "Your installation report {$installation['report_code']} has been {$newStatus}.",
+            "Your installation report {$installation['report_code']} has been {$newStatus}."."{$message}",
             $action === 'approve' ? 'success' : 'danger',
             APP_URL . "/modules/installations/view.php?id={$installationId}"
         );
@@ -392,20 +403,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
             </div>
             <div class="card-body">
                 <p class="mb-3">Review this installation report:</p>
-                <form method="POST" class="d-flex gap-2">
-                    <button type="submit" name="action" value="approve" class="btn btn-success flex-fill">
-                        <i class="bi bi-check-lg me-1"></i>Approve
-                    </button>
-                    <button type="submit" name="action" value="reject" class="btn btn-danger flex-fill" 
-                            onclick="return confirm('Are you sure you want to reject this report?')">
-                        <i class="bi bi-x-lg me-1"></i>Reject
-                    </button>
+
+                <form method="POST" id="reviewForm">
+                    <!-- Hidden input to track action -->
+                    <input type="hidden" name="action" id="actionInput">
+
+                    <!-- Reject message (hidden by default) -->
+                    <div id="rejectMessageBox" class="mb-3" style="display: none;">
+                        <label class="form-label">Reason for Rejection</label>
+                        <textarea 
+                            name="reject_message" 
+                            class="form-control" 
+                            rows="3" 
+                            placeholder="Please provide reason for rejection..."></textarea>
+                        
+                        <input type="checkbox" name="edit_perm" id="edit_perm" value="checked" style="margin-top: 10px;"> 
+                        <label for="edit_perm">Allow edits</label>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button 
+                            type="button" 
+                            class="btn btn-success flex-fill"
+                            onclick="submitReview('approve')">
+                            <i class="bi bi-check-lg me-1"></i>Approve
+                        </button>
+
+                        <button 
+                            type="button" 
+                            class="btn btn-danger flex-fill"
+                            onclick="handleReject()">
+                            <i class="bi bi-x-lg me-1"></i>Reject
+                        </button>
+                    </div>
+
+                    <!-- Final submit button (only appears when rejecting) -->
+                    <div id="confirmRejectBox" class="mt-3" style="display: none;">
+                    <button type="submit" class="btn btn-danger w-100" onclick="return validateReject()">
+                            Confirm Reject
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
         <?php endif; ?>
     </div>
-    
+
     <!-- Items and Photos -->
     <div class="col-lg-8 mb-4">
         <!-- Summary -->
@@ -659,5 +702,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         </div>
     </div>
 </div>
+<script>
+function submitReview(action) {
+    document.getElementById('actionInput').value = action;
+    document.getElementById('reviewForm').submit();
+}
 
+function handleReject() {
+    document.getElementById('actionInput').value = 'reject';
+    document.getElementById('rejectMessageBox').style.display = 'block';
+    document.getElementById('confirmRejectBox').style.display = 'block';
+}
+</script>
 <?php require_once '../../includes/footer.php'; ?>

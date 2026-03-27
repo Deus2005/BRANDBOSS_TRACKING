@@ -54,6 +54,23 @@ if ($assignmentId) {
     }
 }
 
+$location = $db->fetch(
+    "SELECT 
+        a.barangay_name,
+        b.municipality_name,
+        c.province_name,
+        d.region_name
+     FROM table_barangay a
+     JOIN table_municipality b
+        ON a.municipality_id = b.municipality_id
+     JOIN table_province c
+        ON b.province_id = c.province_id
+     JOIN table_region d 
+        ON c.region_id = d.region_id
+     WHERE LOWER(b.municipality_name) = LOWER(?)",
+    [trim($selectedAssignment['area_name'])]
+);
+
 function old($key) {
     return htmlspecialchars($_POST[$key] ?? '');
 }
@@ -106,11 +123,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
         $errors['gps'] = 'GPS location is required. Please enable location services.';
     }
 
-    if($latitude != $mnl_latitude || $longitude != $mnl_longitude) {
-        $errors['mnl_gps'] = 'GPS location is required. Please enable location services.';
-    } else {
-        unset($errors['mnl_gps']);
-    }
+if (
+    $_POST['latitude'] !== $_POST['mnl_latitude'] ||
+    $_POST['longitude'] !== $_POST['mnl_longitude']
+) {
+    $errors['mnl_gps'] = 'GPS location mismatch.';
+} else {
+    unset($errors['mnl_gps']);
+}
 
     if (empty($itemData)) {
         $errors['items'] = 'Please provide installation data for at least one item';
@@ -481,7 +501,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                 </div>
                 <div class="card-body">
                     <?php if (isset($errors['gps'])): ?>
-                    <div class="alert alert-danger py-2"><?php echo $errors['gps']; ?></div>
+                        <div class="alert alert-danger py-2"><?php echo $errors['gps']; ?></div>
                     <?php endif; ?>
                     
                     <div id="gps-status" class="text-center py-3">
@@ -504,7 +524,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                             <i class="bi bi-arrow-clockwise me-1"></i>Refresh Location
                         </button>
                     </div>
-                    
                 </div>
             </div>
 
@@ -514,7 +533,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                 </div>
                 <div class="card-body">
                     <?php if (isset($errors['mnl_gps'])): ?>
-                        <div class="alert alert-danger py-2"><?php echo $errors['gps']; ?></div>
+                        <div class="alert alert-danger py-2"><?php echo $errors['mnl_gps']; ?></div>
                     <?php endif; ?>
                     <div class="mb-3">
                         <label for="mnl_latitude" class="form-label">Latitude</label>
@@ -688,13 +707,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="city" class="form-label">City <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="city" name="city"
-                                   value="<?= old('city') ?>" placeholder="e.g., Makati" required>
+                            <select class="form-select" id="city" name="city" required>
+                                    <option value="<?= $selectedAssignment['area_name'] ?>"><?= $selectedAssignment['area_name'] ?></option>
+                            </select>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="province" class="form-label">Province <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="province" name="province"
-                                   value="<?= old('province') ?>" placeholder="e.g., Metro Manila" required>
+                            
+                            <select class="form-select" id="province" name="province" required>
+                                <option value="">Select Province</option>
+                                <?php foreach ($location as $location): ?>
+                                <option value="<?= $location['province_name'] ?>">
+                                    <?= $location['province_name'] ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                            
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="province" class="form-label">State <span class="text-danger">*</span></label>
+                            <select class="form-select" id="province" name="province" required>
+                                <option value="">Select State</option>
+                                <option value="<?= $location['region_name'] ?>">
+                                    <?= $location['region_name'] ?>
+                                </option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -1063,33 +1100,108 @@ function removePhoto(button, inputId, photoIndex) {
 }
 
 // Get GPS Location
+let lastCoords = null;
+let watchId = null;
+
+const MIN_DISTANCE_METERS = 8;
+
+function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const toRad = deg => deg * Math.PI / 180;
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a = Math.sin(dLat/2) ** 2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon/2) ** 2;
+
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+}
+
+function updateUI(latitude, longitude) {
+    const lat = latitude.toFixed(6);
+    const lng = longitude.toFixed(6);
+
+    // hidden (auto)
+    document.getElementById('latitude').value = lat;
+    document.getElementById('longitude').value = lng;
+
+    // also update visible fields (so user copies exact value)
+    document.getElementById('mnl_latitude').value = lat;
+    document.getElementById('mnl_longitude').value = lng;
+
+    document.getElementById('lat-display').textContent = lat;
+    document.getElementById('lng-display').textContent = lng;
+}
+
 function getLocation() {
     const status = document.getElementById('gps-status');
     const result = document.getElementById('gps-result');
     const error = document.getElementById('gps-error');
     const submitBtn = document.getElementById('submitBtn');
-    
+
     status.style.display = 'block';
     result.style.display = 'none';
     error.style.display = 'none';
-    
-    App.getLocation()
-        .then(coords => {
-            document.getElementById('latitude').value = coords.latitude;
-            document.getElementById('longitude').value = coords.longitude;
-            document.getElementById('lat-display').textContent = coords.latitude.toFixed(6);
-            document.getElementById('lng-display').textContent = coords.longitude.toFixed(6);
-            
+
+    if (!navigator.geolocation) {
+        error.textContent = "Geolocation not supported.";
+        error.style.display = 'block';
+        return;
+    }
+
+    // 🚀 STEP 1: Get quick location (fast, cached allowed)
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            const { latitude, longitude } = pos.coords;
+
+            lastCoords = { latitude, longitude };
+            updateUI(latitude, longitude);
+
             status.style.display = 'none';
             result.style.display = 'block';
             submitBtn.disabled = false;
-        })
-        .catch(err => {
-            status.style.display = 'none';
-            error.style.display = 'block';
+        },
+        err => {
             error.textContent = err.message;
-            submitBtn.disabled = true;
-        });
+            error.style.display = 'block';
+        },
+        {
+            enableHighAccuracy: false, // fast
+            maximumAge: 60000,         // allow cached (1 min)
+            timeout: 5000
+        }
+    );
+
+    // 🎯 STEP 2: Refine in background (accurate)
+    watchId = navigator.geolocation.watchPosition(
+        pos => {
+            const { latitude, longitude, accuracy } = pos.coords;
+
+            if (accuracy > 30) return;
+
+            if (lastCoords) {
+                const distance = getDistance(
+                    lastCoords.latitude,
+                    lastCoords.longitude,
+                    latitude,
+                    longitude
+                );
+
+                if (distance < MIN_DISTANCE_METERS) return;
+            }
+
+            lastCoords = { latitude, longitude };
+            updateUI(latitude, longitude);
+        },
+        () => {},
+        {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 10000
+        }
+    );
 }
 
 // Refresh GPS
