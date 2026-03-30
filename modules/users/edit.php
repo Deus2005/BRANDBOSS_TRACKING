@@ -52,14 +52,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'employee_id' => clean($_POST['employee_id'] ?? ''),
         'username' => clean($_POST['username'] ?? ''),
         'email' => clean($_POST['email'] ?? ''),
-        'full_name' => clean($_POST['full_name'] ?? ''),
+        'first_name' => clean($_POST['first_name'] ?? ''),
+        'last_name' => clean($_POST['last_name'] ?? ''),
         'phone' => clean($_POST['phone'] ?? ''),
         'role' => $_POST['role'] ?? $user['role'],
         'status' => $_POST['status'] ?? $user['status']
     ];
     
     // Validation
-    $errors = validateRequired($data, ['employee_id', 'username', 'email', 'full_name', 'role']);
+    $errors = validateRequired($data, ['employee_id', 'username', 'email', 'first_name', 'last_name', 'role']);
     
     // Check unique fields (excluding current user)
     if (empty($errors)) {
@@ -86,7 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'employee_id' => $user['employee_id'],
                 'username' => $user['username'],
                 'email' => $user['email'],
-                'full_name' => $user['full_name'],
+                'first_name' => $user['first_name'],
+                'last_name' => $user['last_name'],
                 'phone' => $user['phone'],
                 'role' => $user['role'],
                 'status' => $user['status']
@@ -122,7 +124,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header bg-primary">
-                <i class="bi bi-person me-2"></i>User Information
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-person me-2"></span>
+                User Information
+                </span>
             </div>
             <div class="card-body">
                 <form method="POST" action="">
@@ -138,17 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="invalid-feedback"><?php echo $errors['employee_id']; ?></div>
                             <?php endif; ?>
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control <?php echo isset($errors['full_name']) ? 'is-invalid' : ''; ?>" 
-                                   id="full_name" name="full_name" 
-                                   value="<?php echo clean($_POST['full_name'] ?? $user['full_name']); ?>" required>
-                            <?php if (isset($errors['full_name'])): ?>
-                            <div class="invalid-feedback"><?php echo $errors['full_name']; ?></div>
-                            <?php endif; ?>
-                        </div>
-                        
+
                         <div class="col-md-6 mb-3">
                             <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
                             <input type="text" class="form-control <?php echo isset($errors['username']) ? 'is-invalid' : ''; ?>" 
@@ -158,6 +153,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="invalid-feedback"><?php echo $errors['username']; ?></div>
                             <?php endif; ?>
                         </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control <?php echo isset($errors['first_name']) ? 'is-invalid' : ''; ?>" 
+                                   id="first_name" name="first_name" 
+                                   value="<?php echo clean($_POST['first_name'] ?? $user['first_name']); ?>" required>
+                            <?php if (isset($errors['first_name'])): ?>
+                            <div class="invalid-feedback"><?php echo $errors['first_name']; ?></div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control <?php echo isset($errors['last_name']) ? 'is-invalid' : ''; ?>" 
+                                   id="last_name" name="last_name" 
+                                   value="<?php echo clean($_POST['first_name'] ?? $user['first_name']); ?>" required>
+                            <?php if (isset($errors['first_name'])): ?>
+                            <div class="invalid-feedback"><?php echo $errors['first_name']; ?></div>
+                            <?php endif; ?>
+                        </div>
+                    
                         
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
@@ -170,10 +186,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         
                         <div class="col-md-6 mb-3">
-                            <label for="phone" class="form-label">Phone Number</label>
-                            <input type="tel" class="form-control" id="phone" name="phone" 
-                                   value="<?php echo clean($_POST['phone'] ?? $user['phone']); ?>">
-                        </div>
+                           <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                        <input type="tel" 
+                          class="form-control <?php echo isset($errors['phone']) ? 'is-invalid' : ''; ?>" 
+                         id="phone" name="phone" 
+                         value="<?php echo clean($_POST['phone'] ?? $user['phone']); ?>"  required>
+           
+                            <?php if (isset($errors['phone'])): ?>
+                            <div class="invalid-feedback"><?php echo $errors['phone']; ?></div>
+                           <?php endif; ?>
+                         </div>
                         
                         <div class="col-md-6 mb-3">
                             <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
@@ -221,14 +243,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="col-lg-4">
         <div class="card">
             <div class="card-header bg-primary">
-                <i class="bi bi-info-circle me-2"></i>Account Info
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-info-circle me-2"></span>
+                Account Info
+                            </span>
             </div>
             <div class="card-body">
                 <div class="text-center mb-3">
                     <div class="user-avatar mx-auto mb-2" style="width: 80px; height: 80px; font-size: 2rem;">
-                        <?php echo strtoupper(substr($user['full_name'], 0, 1)); ?>
+                        <?php echo strtoupper(substr($user['first_name'], 0, 1) . substr($user['last_name'], 0, 1)); ?>
                     </div>
-                    <h5 class="mb-1"><?php echo clean($user['full_name']); ?></h5>
+                     <h4 class="mb-1">
+                <?php echo clean($user['first_name'] . ' ' . $user['last_name']);?>
+                </h4>
                     <span class="badge bg-<?php echo $user['role'] === 'super_admin' ? 'danger' : 'primary'; ?>">
                         <?php echo roleName($user['role']); ?>
                     </span>
