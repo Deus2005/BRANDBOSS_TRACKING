@@ -107,19 +107,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="col-lg-6">
         <div class="card">
             <div class="card-header bg-warning text-dark">
-                <i class="bi bi-exclamation-triangle me-2"></i>Reset Password for User
+                <span class="d-flex align-text-center">
+                <span class="bi bi-exclamation-triangle me-2"></span>
+                Reset Password for User
+</span>
             </div>
             <div class="card-body">
                 <!-- User Info -->
-                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
-                    <div class="user-avatar me-3" style="width: 50px; height: 50px;">
-                        <?php echo strtoupper(substr($user['full_name'], 0, 1)); ?>
-                    </div>
-                    <div>
-                        <h5 class="mb-0"><?php echo clean($user['full_name']); ?></h5>
-                        <small class="text-muted"><?php echo clean($user['username']); ?> • <?php echo roleName($user['role']); ?></small>
-                    </div>
-                </div>
+               <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+
+    <!-- Avatar -->
+    <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center me-3"
+         style="width:50px;height:50px;font-weight:600;font-size:18px;">
+        <?php 
+        echo strtoupper(substr($user['first_name'], 0, 1) . substr($user['last_name'], 0, 1)); 
+        ?>
+    </div>
+
+    <!-- User info -->
+    <div>
+        <h5 class="mb-0">
+            <?php echo clean($user['first_name'] . ' ' . $user['last_name']); ?>
+        </h5>
+        <small class="text-muted">
+            <?php echo clean($user['username']); ?> • <?php echo roleName($user['role']); ?>
+        </small>
+    </div>
+
+</div>
                 
                 <?php if (!$success): ?>
                 <form method="POST" action="">
