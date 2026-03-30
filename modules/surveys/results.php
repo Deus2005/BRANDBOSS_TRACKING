@@ -23,7 +23,7 @@ if (!$surveyId) {
 
 // Get survey with creator info
 $survey = $db->fetch(
-    "SELECT s.*, u.full_name as created_by_name 
+    "SELECT s.*, CONCAT(u.first_name, ' ', u.last_name) as created_by_name 
      FROM surveys s 
      JOIN users u ON s.created_by = u.id 
      WHERE s.id = ?",
@@ -56,7 +56,7 @@ $inProgressResponses = $db->count('survey_responses', "survey_id = ? AND status 
 // Get responses for detailed view (with pagination)
 $page = max(1, intval($_GET['page'] ?? 1));
 $responsesResult = $db->paginate(
-    "SELECT sr.*, u.full_name as respondent_name, u.role as respondent_role
+    "SELECT sr.*, CONCAT(u.first_name, ' ', u.last_name) as respondent_name, u.role as respondent_role
      FROM survey_responses sr
      LEFT JOIN users u ON sr.respondent_id = u.id
      WHERE sr.survey_id = ? AND sr.status = 'completed'
@@ -159,6 +159,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="survey_' . $survey['survey_code'] . '_results.csv"');
     
+    ob_end_clean();
     $output = fopen('php://output', 'w');
     
     $headers = ['Response ID', 'Respondent', 'Submitted At'];
@@ -168,7 +169,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     fputcsv($output, $headers);
     
     $allResponses = $db->fetchAll(
-        "SELECT sr.*, u.full_name as respondent_name
+        "SELECT sr.*, CONCAT(u.first_name, ' ', u.last_name) as respondent_name
          FROM survey_responses sr
          LEFT JOIN users u ON sr.respondent_id = u.id
          WHERE sr.survey_id = ? AND sr.status = 'completed'
