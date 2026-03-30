@@ -18,16 +18,20 @@ $user = $db->fetch("SELECT * FROM users WHERE id = ?", [$userId]);
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [
-        'full_name' => clean($_POST['full_name'] ?? ''),
+        'first_name' => clean($_POST['first_name'] ?? ''),
+        'last_name' => clean($_POST['last_name'] ?? ''),
         'email' => clean($_POST['email'] ?? ''),
         'phone' => clean($_POST['phone'] ?? '')
     ];
     
     // Validation
-    if (empty($data['full_name'])) {
-        $errors['full_name'] = 'Full name is required';
+   if (empty($data['first_name'])) {
+    $errors['first_name'] = 'First name is required';
+     }
+
+   if (empty($data['last_name'])) {
+    $errors['last_name'] = 'Last name is required';
     }
-    
     if (empty($data['email'])) {
         $errors['email'] = 'Email is required';
     } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
@@ -41,7 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db->update('users', $data, 'id = ?', [$userId]);
             
             // Update session
-            $_SESSION['full_name'] = $data['full_name'];
+            $_SESSION['first_name'] = $data['first_name'];
+            $_SESSION['last_name'] = $data['last_name'];
             $_SESSION['email'] = $data['email'];
             
             $auth->logActivity($userId, 'updated_profile', 'profile', 'users', $userId);
@@ -107,11 +112,15 @@ if ($currentRole === 'user_2') {
     <div class="col-lg-4 mb-4">
         <div class="card">
             <div class="card-body text-center">
-                <div class="user-avatar mx-auto mb-3" style="width: 100px; height: 100px; font-size: 2.5rem;">
-                    <?php echo strtoupper(substr($user['full_name'], 0, 1)); ?>
+            <div class="user-avatar mx-auto mb-3" style="width: 100px; height: 100px; font-size: 2.5rem;"> 
+                <?php 
+                echo strtoupper(substr($user['first_name'], 0, 1) . substr($user['last_name'], 0, 1)); ?>
                 </div>
-                <h4 class="mb-1"><?php echo clean($user['full_name']); ?></h4>
-                <p class="text-muted mb-2"><?php echo clean($user['username']); ?></p>
+
+                <h4 class="mb-1">
+                <?php echo clean($user['first_name'] . ' ' . $user['last_name']);?>
+                </h4>
+                <p class="text-muted mb-2"><?php echo clean($user['user_name']); ?></p>
                 <span class="badge bg-<?php echo $user['role'] === 'super_admin' ? 'danger' : 'primary'; ?> mb-3">
                     <?php echo roleName($user['role']); ?>
                 </span>
@@ -128,7 +137,9 @@ if ($currentRole === 'user_2') {
                         <td><?php echo $user['phone'] ? clean($user['phone']) : '<span class="text-muted">Not set</span>'; ?></td>
                     </tr>
                     <tr>
-                        <td class="text-muted"><i class="bi bi-badge-id me-2"></i>Employee ID:</td>
+                        <td class="text-muted">
+                             <i class="bi bi-person-badge me-2"></i>Employee ID:
+                        </td>
                         <td><?php echo clean($user['employee_id']); ?></td>
                     </tr>
                     <tr>
@@ -146,7 +157,10 @@ if ($currentRole === 'user_2') {
         <?php if (!empty($stats)): ?>
         <div class="card mt-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-graph-up me-2"></i>My Statistics
+                <span class="d-flex align-text-center">
+                <span class="bi bi-graph-up me-2"></span>
+                My Statistics
+        </span>
             </div>
             <div class="card-body">
                 <table class="table table-sm table-borderless mb-0">
@@ -166,7 +180,10 @@ if ($currentRole === 'user_2') {
     <div class="col-lg-8 mb-4">
         <div class="card">
             <div class="card-header bg-primary">
-                <i class="bi bi-pencil me-2"></i>Edit Profile
+                <span class="d-flex align-text-center">
+                <span class="bi bi-pencil me-2"></span>
+                Edit Profile
+                    </span>
             </div>
             <div class="card-body">
                 <form method="POST" action="">
@@ -186,15 +203,25 @@ if ($currentRole === 'user_2') {
                         </div>
                         
                         <div class="col-md-6 mb-3">
-                            <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control <?php echo isset($errors['full_name']) ? 'is-invalid' : ''; ?>" 
-                                   id="full_name" name="full_name" 
-                                   value="<?php echo clean($_POST['full_name'] ?? $user['full_name']); ?>" required>
-                            <?php if (isset($errors['full_name'])): ?>
-                            <div class="invalid-feedback"><?php echo $errors['full_name']; ?></div>
+                            <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control <?php echo isset($errors['first_name']) ? 'is-invalid' : ''; ?>" 
+                                   id="first_name" name="first_name" 
+                                   value="<?php echo clean($_POST['first_name'] ?? $user['first_name']); ?>" required>
+                            <?php if (isset($errors['first_name'])): ?>
+                            <div class="invalid-feedback"><?php echo $errors['first_name']; ?></div>
                             <?php endif; ?>
                         </div>
                         
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control <?php echo isset($errors['last_name']) ? 'is-invalid' : ''; ?>" 
+                                   id="last_name" name="last_name" 
+                                   value="<?php echo clean($_POST['last_name'] ?? $user['last_name']); ?>" required>
+                            <?php if (isset($errors['last_name'])): ?>
+                            <div class="invalid-feedback"><?php echo $errors['last_name']; ?></div>
+                            <?php endif; ?>
+                        </div>
+
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                             <input type="email" class="form-control <?php echo isset($errors['email']) ? 'is-invalid' : ''; ?>" 
@@ -206,10 +233,16 @@ if ($currentRole === 'user_2') {
                         </div>
                         
                         <div class="col-md-6 mb-3">
-                            <label for="phone" class="form-label">Phone Number</label>
-                            <input type="tel" class="form-control" id="phone" name="phone" 
-                                   value="<?php echo clean($_POST['phone'] ?? $user['phone']); ?>">
-                        </div>
+                           <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                        <input type="tel" 
+                          class="form-control <?php echo isset($errors['phone']) ? 'is-invalid' : ''; ?>" 
+                         id="phone" name="phone" 
+                         value="<?php echo clean($_POST['phone'] ?? $user['phone']); ?>"  required>
+           
+                            <?php if (isset($errors['phone'])): ?>
+                            <div class="invalid-feedback"><?php echo $errors['phone']; ?></div>
+                           <?php endif; ?>
+                         </div>
                         
                         <div class="col-md-6 mb-3">
                             <label for="role" class="form-label">Role</label>
