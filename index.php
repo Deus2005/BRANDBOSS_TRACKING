@@ -29,7 +29,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
     
     // Recent activities
     $recentActivities = $db->fetchAll(
-        "SELECT al.*, u.full_name 
+        "SELECT al.*, CONCAT(u.first_name, ' ', last_name) as full_name 
          FROM activity_logs al 
          JOIN users u ON al.user_id = u.id 
          ORDER BY al.created_at DESC 
@@ -38,7 +38,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
     
     // Recent installations
     $recentInstallations = $db->fetchAll(
-        "SELECT ir.*, u.full_name as installer_name, ia.area_name
+        "SELECT ir.*, CONCAT(u.first_name, ' ', last_name) as installer_name, ia.area_name
          FROM installation_reports ir
          JOIN users u ON ir.installer_id = u.id
          JOIN assignments a ON ir.assignment_id = a.id
@@ -360,7 +360,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
     <!-- Manager View -->
     <div class="col-lg-8 mb-4">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-dark text-white">
                 <i class="bi bi-camera me-2"></i>Recent Installations
                 <a href="<?php echo APP_URL; ?>/modules/installations/index.php" class="btn btn-sm btn-outline-primary ms-auto">View All</a>
             </div>
@@ -399,7 +399,8 @@ if (in_array($role, ['super_admin', 'user_1'])) {
     
     <div class="col-lg-4 mb-4">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-dark text-white">
+                <span class="d-flex align-text-center">
                 <i class="bi bi-activity me-2"></i>Recent Activity
             </div>
             <div class="card-body">
@@ -426,7 +427,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
     <!-- Installer View -->
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-dark text-white">
                 <i class="bi bi-clipboard-check me-2"></i>My Assignments
                 <a href="<?php echo APP_URL; ?>/modules/assignments/index.php" class="btn btn-sm btn-outline-primary ms-auto">View All</a>
             </div>
@@ -484,7 +485,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
     <!-- Inspector View -->
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-dark text-white">
                 <i class="bi bi-search me-2"></i>Due Inspections
                 <a href="<?php echo APP_URL; ?>/modules/inspections/index.php" class="btn btn-sm btn-outline-primary ms-auto">View All</a>
             </div>
@@ -542,7 +543,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
     <!-- Maintenance View -->
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-dark text-white">
                 <i class="bi bi-wrench me-2"></i>My Tickets
                 <a href="<?php echo APP_URL; ?>/modules/maintenance/index.php" class="btn btn-sm btn-outline-primary ms-auto">View All</a>
             </div>
