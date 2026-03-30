@@ -224,7 +224,7 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                 </button>
                 <nav aria-label="breadcrumb" class="d-none d-md-block">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a id="home-link" href="<?php echo APP_URL; ?>">Home</a></li>
+                        <li class="breadcrumb-item"><a href="<?php echo APP_URL; ?>">Home</a></li>
                         <?php if (isset($breadcrumbs)): ?>
                             <?php foreach ($breadcrumbs as $crumb): ?>
                                 <?php if (isset($crumb['url'])): ?>
@@ -263,11 +263,14 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                 <!-- User Dropdown -->
                 <div class="dropdown user-dropdown">
                     <button class="user-btn" data-bs-toggle="dropdown">
-                        <div class="user-avatar">
-                            <?php echo strtoupper(substr($currentUser['full_name'], 0, 1)); ?>
-                        </div>
+                       <div class="user-avatar">
+                     <?php 
+                        echo strtoupper(substr($currentUser['first_name'], 0, 1) . substr($currentUser['last_name'], 0, 1)); ?>
+                    </div>
                         <div class="user-info">
-                            <div class="user-name"><?php echo clean($currentUser['full_name']); ?></div>
+                            <div class="user-name">
+                            <?php echo clean($currentUser['first_name'] . ' ' . $currentUser['last_name']); ?>
+                        </div>
                             <div class="user-role"><?php echo roleName($currentRole); ?></div>
                         </div>
                         <i class="bi bi-chevron-down ms-1"></i>
@@ -276,11 +279,6 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                         <li>
                             <a class="dropdown-item" href="<?php echo APP_URL; ?>/profile.php">
                                 <i class="bi bi-person"></i> My Profile
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="<?php echo APP_URL; ?>/change-password.php">
-                                <i class="bi bi-key"></i> Change Password
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
