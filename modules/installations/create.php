@@ -54,22 +54,41 @@ if ($assignmentId) {
     }
 }
 
-$location = $db->fetch(
-    "SELECT 
-        a.barangay_name,
-        b.municipality_name,
-        c.province_name,
-        d.region_name
-     FROM table_barangay a
-     JOIN table_municipality b
-        ON a.municipality_id = b.municipality_id
-     JOIN table_province c
-        ON b.province_id = c.province_id
-     JOIN table_region d 
-        ON c.region_id = d.region_id
-     WHERE LOWER(b.municipality_name) = LOWER(?)",
-    [trim($selectedAssignment['area_name'])]
-);
+$location = null;
+$municipalityId = null;
+$barangays = [];
+
+if ($selectedAssignment) {
+
+    // 1. Get municipality info including its ID
+    $municipality = $db->fetch(
+        "SELECT b.municipality_id, b.municipality_name, c.province_name, d.region_name
+         FROM table_municipality b
+         JOIN table_province c ON b.province_id = c.province_id
+         JOIN table_region d ON c.region_id = d.region_id
+         WHERE LOWER(b.municipality_name) = LOWER(?)",
+        [trim($selectedAssignment['area_name'])]
+    );
+
+    if ($municipality) {
+        $location = [
+            'province_name' => $municipality['province_name'],
+            'region_name' => $municipality['region_name']
+        ];
+
+        $municipalityId = $municipality['municipality_id'];
+
+        // 2. Get barangays for this municipality
+        $barangays = $db->fetchAll(
+            "SELECT barangay_name
+             FROM table_barangay
+             WHERE municipality_id = ?
+             ORDER BY barangay_name ASC",
+            [$municipalityId]
+        );
+    }
+}
+
 
 function old($key) {
     return htmlspecialchars($_POST[$key] ?? '');
@@ -122,15 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
     if ($latitude == 0 || $longitude == 0) {
         $errors['gps'] = 'GPS location is required. Please enable location services.';
     }
-
-if (
-    $_POST['latitude'] !== $_POST['mnl_latitude'] ||
-    $_POST['longitude'] !== $_POST['mnl_longitude']
-) {
-    $errors['mnl_gps'] = 'GPS location mismatch.';
-} else {
-    unset($errors['mnl_gps']);
-}
 
     if (empty($itemData)) {
         $errors['items'] = 'Please provide installation data for at least one item';
@@ -699,41 +709,55 @@ if (
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="barangay" class="form-label">Barangay <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="barangay" name="barangay"
-                                   value="<?= old('barangay') ?>" placeholder="e.g., Poblacion" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="city" class="form-label">City <span class="text-danger">*</span></label>
-                            <select class="form-select" id="city" name="city" required>
-                                    <option value="<?= $selectedAssignment['area_name'] ?>"><?= $selectedAssignment['area_name'] ?></option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="province" class="form-label">Province <span class="text-danger">*</span></label>
-                            
-                            <select class="form-select" id="province" name="province" required>
-                                <option value="">Select Province</option>
-                                <?php foreach ($location as $location): ?>
-                                <option value="<?= $location['province_name'] ?>">
-                                    <?= $location['province_name'] ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
-                            
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="province" class="form-label">State <span class="text-danger">*</span></label>
-                            <select class="form-select" id="province" name="province" required>
-                                <option value="">Select State</option>
-                                <option value="<?= $location['region_name'] ?>">
-                                    <?= $location['region_name'] ?>
-                                </option>
-                            </select>
-                        </div>
-                    </div>
+  <div class="row">
+
+    <!-- Barangay (manual) -->
+<div class="col-md-3 mb-3">
+    <label class="form-label">Barangay</label>
+<select class="form-select" id="barangay" name="barangay" required>
+    <option value="">Select Barangay</option>
+    <?php foreach ($barangays as $brgy): ?>
+        <option value="<?= clean($brgy['barangay_name']); ?>">
+            <?= clean($brgy['barangay_name']); ?>
+        </option>
+    <?php endforeach; ?>
+</select>
+</div>
+
+    <!-- City (already selected) -->
+    <div class="col-md-3 mb-3">
+        <label class="form-label">City</label>
+        <input type="text"
+               class="form-control"
+               value="<?php echo clean($selectedAssignment['area_name']); ?>"
+               id="city"
+               name="city"
+               readonly>
+    </div>
+
+    <!-- Province (auto-filled) -->
+    <div class="col-md-3 mb-3">
+        <label class="form-label">Province</label>
+        <input type="text"
+               class="form-control"
+               id="province"
+               name="province"
+               value="<?php echo clean($location['province_name'] ?? ''); ?>"
+               readonly>
+    </div>
+
+    <!-- Region (auto-filled) -->
+    <div class="col-md-3 mb-3">
+        <label class="form-label">Region</label>
+        <input type="text"
+               class="form-control"
+               id="region"
+               name="region"
+               value="<?php echo clean($location['region_name'] ?? ''); ?>"
+               readonly>
+    </div>
+
+</div> 
                 </div>
             </div>
 
@@ -745,12 +769,22 @@ if (
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label for="area_length" class="form-label">Area Length (meters)</label>
+                            <label for="area_unit" class="form-label">Units (eg. Meter, Inch)</label>
+                            <select class="form-control" id="area_unit" name="area_unit">
+                                <option value="">Select unit</option>
+                                <option value="meter">Meters</option>
+                                <option value="cm">Centimeters</option>
+                                <option value="mm">Millimeters</option>
+                                <option value="inch">Inches</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="area_length" class="form-label">Area Length</label>
                             <input type="number" step="0.01" class="form-control" id="area_length" name="area_length"
                                    value="<?= old('area_length') ?>" placeholder="e.g., 10.5" min="0">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label for="area_width" class="form-label">Area Width (meters)</label>
+                            <label for="area_width" class="form-label">Area Width</label>
                             <input type="number" step="0.01" class="form-control" id="area_width" name="area_width"
                                    value="<?= old('area_width') ?>" placeholder="e.g., 8.0" min="0">
                         </div>
@@ -977,19 +1011,69 @@ document.getElementById('contact_number')?.addEventListener('input', function(e)
 
     e.target.value = value;
 });
+// Conversion factors TO meters
+const unitToMeter = {
+    meter: 1,
+    cm: 0.01,
+    mm: 0.001,
+    inch: 0.0254
+};
 
-// SQM Auto-computation
+// Toggle readonly inputs based on unit selection
+function toggleInputs() {
+    const unit = document.getElementById('area_unit')?.value;
+
+    const inputs = [
+        document.getElementById('area_length'),
+        document.getElementById('area_width'),
+        document.getElementById('additional_area_sqm')
+    ];
+
+    inputs.forEach(input => {
+        if (!input) return;
+
+        if (unit) {
+            input.removeAttribute('readonly');
+            input.classList.remove('bg-light'); // remove gray
+        } else {
+            input.setAttribute('readonly', true);
+            input.classList.add('bg-light'); // Bootstrap gray
+            input.value = '';
+        }
+    });
+
+    computeAreaSQM();
+}
+
+// SQM Auto-computation with dynamic unit conversion
 function computeAreaSQM() {
+    const unit = document.getElementById('area_unit')?.value;
+
     const length = parseFloat(document.getElementById('area_length')?.value) || 0;
     const width = parseFloat(document.getElementById('area_width')?.value) || 0;
     const additional = parseFloat(document.getElementById('additional_area_sqm')?.value) || 0;
 
-    const total = (length * width) + additional;
     const display = document.getElementById('computed_sqm');
+
+    if (!unit) {
+        if (display) {
+            display.textContent = '0.00 sqm';
+            display.classList.add('text-muted');
+            display.classList.remove('text-primary');
+        }
+        return;
+    }
+
+    const factor = unitToMeter[unit] || 1;
+
+    const lengthInMeters = length * factor;
+    const widthInMeters = width * factor;
+
+    const total = (lengthInMeters * widthInMeters) + additional;
+
     if (display) {
         display.textContent = total.toFixed(2) + ' sqm';
 
-        // Change color based on size
         if (total > 0) {
             display.classList.remove('text-muted');
             display.classList.add('text-primary');
@@ -1000,9 +1084,15 @@ function computeAreaSQM() {
     }
 }
 
-['area_length', 'area_width', 'additional_area_sqm'].forEach(id => {
+// Event listeners
+['area_length', 'area_width', 'additional_area_sqm']
+.forEach(id => {
     document.getElementById(id)?.addEventListener('input', computeAreaSQM);
 });
+
+document.getElementById('area_unit')?.addEventListener('change', toggleInputs);
+
+window.addEventListener('DOMContentLoaded', toggleInputs);
 
 // ===========================================================================
 // Multiple Photo Upload Handler
@@ -1128,9 +1218,6 @@ function updateUI(latitude, longitude) {
     document.getElementById('longitude').value = lng;
 
     // also update visible fields (so user copies exact value)
-    document.getElementById('mnl_latitude').value = lat;
-    document.getElementById('mnl_longitude').value = lng;
-
     document.getElementById('lat-display').textContent = lat;
     document.getElementById('lng-display').textContent = lng;
 }

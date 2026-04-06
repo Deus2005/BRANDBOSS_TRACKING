@@ -56,6 +56,21 @@ if ($currentRole === 'user_2' && $installation['installer_id'] != $userId) {
     redirect('index.php', 'Access denied', 'danger');
 }
 
+$validate = '';
+$color = '';
+
+if ($installation['latitude'] === $installation['mnl_latitude'] && $installation['longitude'] === $installation['mnl_longitude']) {
+    $validate = 'Location Match';
+} else {
+    $validate = 'Location Mismatch';
+}
+
+if ($validate === 'Location Match') {
+    $color = '#198754'; // green
+} else {
+    $color = '#dc3545'; // red  
+}
+
 // Get overall installation photos
 $overallPhotos = $db->fetchAll(
     "SELECT * FROM installation_report_photos
@@ -247,6 +262,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
                 <hr>
                 
                 <div class="row text-center">
+                    <div class="validate" >
+                        <div class="validate-container" style="display:flex; justify-content: center">
+                            <div class="fit-content">
+                                <strong class="validate-text" style="
+                                background-color: <?php echo $color; ?>; 
+                                font-size: small; 
+                                color: #ffffff; 
+                                height: fit-content; 
+                                width: fit-content; 
+                                padding: 3px;
+                                border-radius: 5px"><?php echo $validate; ?></strong>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="col-6">
                         <small class="text-muted d-block">Latitude</small>
                         <strong><?php echo number_format($installation['latitude'], 6); ?></strong>
