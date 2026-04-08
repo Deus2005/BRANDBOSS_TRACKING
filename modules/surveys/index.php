@@ -31,7 +31,7 @@ if ($currentRole === 'user_1') {
 }
 
 if ($statusFilter) {
-    $where[] = 'status = ?';
+    $where[] = 's.status = ?';
     $params[] = $statusFilter;
 }
 
@@ -44,7 +44,7 @@ if ($search) {
 
 $whereClause = implode(' AND ', $where);
 
-$sql = "SELECT s.*, u.full_name as created_by_name,
+$sql = "SELECT s.*, CONCAT(u.first_name, ' ', u.last_name) as created_by_name,
         (SELECT COUNT(*) FROM survey_questions WHERE survey_id = s.id) as question_count,
         (SELECT COUNT(*) FROM survey_responses WHERE survey_id = s.id AND status = 'completed') as response_count
         FROM surveys s
@@ -73,21 +73,18 @@ $surveys = $result['data'];
                 <input type="text" class="form-control" name="search" placeholder="Search surveys..." 
                        value="<?php echo clean($search); ?>">
             </div>
-            <div class="col-md-3">
-                <select name="status" class="form-select">
-                    <option value="">All Status</option>
-                    <option value="draft" <?php echo $statusFilter === 'draft' ? 'selected' : ''; ?>>Draft</option>
-                    <option value="active" <?php echo $statusFilter === 'active' ? 'selected' : ''; ?>>Active</option>
-                    <option value="closed" <?php echo $statusFilter === 'closed' ? 'selected' : ''; ?>>Closed</option>
-                </select>
-            </div>
+           <div class="col-md-3">
+    <select name="status" class="form-select" onchange="this.form.submit()">
+        <option value="">All Status</option>
+        <option value="draft" <?php echo $statusFilter === 'draft' ? 'selected' : ''; ?>>Draft</option>
+        <option value="active" <?php echo $statusFilter === 'active' ? 'selected' : ''; ?>>Active</option>
+        <option value="closed" <?php echo $statusFilter === 'closed' ? 'selected' : ''; ?>>Closed</option>
+    </select>
+</div>
             <div class="col-md-5">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Filter
-                </button>
-                <a href="index.php" class="btn btn-outline-secondary">
+            <a href="index.php" class="btn btn-danger">
                     <i class="bi bi-x-lg"></i> Clear
-                </a>
+            </a>
             </div>
         </form>
     </div>
@@ -169,40 +166,66 @@ $surveys = $result['data'];
                             <small><?php echo formatDateTime($survey['created_at']); ?></small>
                             <div class="text-muted small"><?php echo clean($survey['created_by_name']); ?></div>
                         </td>
-                        <td class="text-center">
-                            <div class="btn-group btn-group-sm">
-                                <?php if ($survey['response_count'] > 0): ?>
-                                <a href="results.php?id=<?php echo $survey['id']; ?>" class="btn btn-outline-info" title="View Results">
-                                    <i class="bi bi-graph-up"></i>
-                                </a>
-                                <?php endif; ?>
-                                
-                                <?php if ($survey['status'] !== 'closed'): ?>
-                                <a href="edit.php?id=<?php echo $survey['id']; ?>" class="btn btn-outline-secondary" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <?php endif; ?>
-                                
-                                <?php if ($survey['status'] === 'draft'): ?>
-                                <button type="button" class="btn btn-outline-success btn-publish" 
-                                        data-id="<?php echo $survey['id']; ?>" title="Publish">
-                                    <i class="bi bi-send"></i>
-                                </button>
-                                <?php elseif ($survey['status'] === 'active'): ?>
-                                <button type="button" class="btn btn-outline-danger btn-close-survey" 
-                                        data-id="<?php echo $survey['id']; ?>" title="Close Survey">
-                                    <i class="bi bi-x-circle"></i>
-                                </button>
-                                <?php endif; ?>
-                                
-                                <?php if ($survey['response_count'] == 0): ?>
-                                <button type="button" class="btn btn-outline-danger btn-delete" 
-                                        data-id="<?php echo $survey['id']; ?>" title="Delete">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                                <?php endif; ?>
-                            </div>
-                        </td>
+<td class="text-center">
+
+<div class="droplist">
+    <button type="button"
+            class="btn btn-sm btn-link text-dark p-0 border-0"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">
+        <i class="bi bi-three-dots-vertical"></i>
+    </button>
+
+    <ul class="dropdown-menu dropdown-menu-end">
+
+        
+        <li>
+            <a class="dropdown-item" href="results.php?id=<?php echo $survey['id']; ?>">
+                <i class="bi bi-graph-up me-2"></i>View Results
+            </a>
+        </li>
+
+        <?php if ($survey['status'] !== 'closed'): ?>
+        <li>
+            <a class="dropdown-item" href="edit.php?id=<?php echo $survey['id']; ?>">
+                <i class="bi bi-pencil me-2"></i>Edit
+            </a>
+        </li>
+        <?php endif; ?>
+
+        <?php if ($survey['status'] === 'draft'): ?>
+        <li>
+            <button type="button"
+                    class="dropdown-item text-success btn-publish"
+                    data-id="<?php echo $survey['id']; ?>">
+                <i class="bi bi-send me-2"></i>Publish
+            </button>
+        </li>
+        <?php elseif ($survey['status'] === 'active'): ?>
+        <li>
+            <button type="button"
+                    class="dropdown-item text-danger btn-close-survey"
+                    data-id="<?php echo $survey['id']; ?>">
+                <i class="bi bi-x-circle me-2"></i>Close Survey
+            </button>
+        </li>
+        <?php endif; ?>
+
+        <?php if ($survey['response_count'] == 0): ?>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+            <button type="button"
+                    class="dropdown-item text-danger btn-delete"
+                    data-id="<?php echo $survey['id']; ?>">
+                <i class="bi bi-trash me-2"></i>Delete
+            </button>
+        </li>
+        <?php endif; ?>
+
+    </ul>
+</div>
+
+</td>
                     </tr>
                     <?php endforeach; ?>
                     <?php endif; ?>
