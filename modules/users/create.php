@@ -27,6 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'employee_id' => clean($_POST['employee_id'] ?? ''),
         'username' => clean($_POST['username'] ?? ''),
         'email' => clean($_POST['email'] ?? ''),
+        'first_name' => clean($_POST['first_name'] ?? ''),
+        'last_name' => clean($_POST['last_name'] ?? ''),
         'full_name' => clean($_POST['full_name'] ?? ''),
         'phone' => clean($_POST['phone'] ?? ''),
         'role' => $_POST['role'] ?? '',
@@ -38,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirmPassword = $_POST['confirm_password'] ?? '';
     
     // Validation
-    $errors = validateRequired($data, ['employee_id', 'username', 'email', 'full_name', 'role']);
+    $errors = validateRequired($data, ['employee_id', 'username', 'email', 'first_name', 'last_name', 'role']);
     
     if (empty($password)) {
         $errors['password'] = 'Password is required';
@@ -96,7 +98,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="card">
     <div class="card-header bg-primary">
-        <i class="bi bi-person me-2"></i>User Information
+        <span class="d-flex align-text-center">
+        <span class="bi bi-person me-2"></span>
+        User Information
+</span>
     </div>
     <div class="card-body">
         <form method="POST" action="">
@@ -111,20 +116,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control <?php echo isset($errors['full_name']) ? 'is-invalid' : ''; ?>" 
-                           id="full_name" name="full_name" value="<?php echo clean($_POST['full_name'] ?? ''); ?>" required>
-                    <?php if (isset($errors['full_name'])): ?>
-                    <div class="invalid-feedback"><?php echo $errors['full_name']; ?></div>
-                    <?php endif; ?>
-                </div>
-                
-                <div class="col-md-6 mb-3">
                     <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
                     <input type="text" class="form-control <?php echo isset($errors['username']) ? 'is-invalid' : ''; ?>" 
                            id="username" name="username" value="<?php echo clean($_POST['username'] ?? ''); ?>" required>
                     <?php if (isset($errors['username'])): ?>
                     <div class="invalid-feedback"><?php echo $errors['username']; ?></div>
+                    <?php endif; ?>
+                </div>
+            
+                <div class="col-md-6 mb-3">
+                    <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control <?php echo isset($errors['first_name']) ? 'is-invalid' : ''; ?>" 
+                           id="first_name" name="first_name" value="<?php echo clean($_POST['first_name'] ?? ''); ?>" required>
+                    <?php if (isset($errors['first_name'])): ?>
+                    <div class="invalid-feedback"><?php echo $errors['first_name']; ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control <?php echo isset($errors['last_name']) ? 'is-invalid' : ''; ?>" 
+                           id="last_name" name="last_name" value="<?php echo clean($_POST['last_name'] ?? ''); ?>" required>
+                    <?php if (isset($errors['last_name'])): ?>
+                    <div class="invalid-feedback"><?php echo $errors['last_name']; ?></div>
                     <?php endif; ?>
                 </div>
                 
@@ -137,11 +151,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php endif; ?>
                 </div>
                 
-                <div class="col-md-6 mb-3">
-                    <label for="phone" class="form-label">Phone Number</label>
-                    <input type="tel" class="form-control" id="phone" name="phone" 
-                           value="<?php echo clean($_POST['phone'] ?? ''); ?>">
-                </div>
+                        <div class="col-md-6 mb-3">
+                           <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                        <input type="tel" 
+                          class="form-control <?php echo isset($errors['phone']) ? 'is-invalid' : ''; ?>" 
+                         id="phone" name="phone" 
+                         value="<?php echo clean($_POST['phone'] ?? $user['phone']); ?>"  required>
+           
+                            <?php if (isset($errors['phone'])): ?>
+                            <div class="invalid-feedback"><?php echo $errors['phone']; ?></div>
+                           <?php endif; ?>
+                         </div>
                 
                 <div class="col-md-6 mb-3">
                     <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
@@ -157,6 +177,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php if (isset($errors['role'])): ?>
                     <div class="invalid-feedback"><?php echo $errors['role']; ?></div>
                     <?php endif; ?>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="active" <?php echo ($_POST['status'] ?? 'active') === 'active' ? 'selected' : ''; ?>>Active</option>
+                        <option value="inactive" <?php echo ($_POST['status'] ?? '') === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
+                    </select>
                 </div>
                 
                 <div class="col-md-6 mb-3">
@@ -187,14 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="text-danger small"><?php echo $errors['confirm_password']; ?></div>
                     <?php endif; ?>
                 </div>
-                
-                <div class="col-md-6 mb-3">
-                    <label for="status" class="form-label">Status</label>
-                    <select class="form-select" id="status" name="status">
-                        <option value="active" <?php echo ($_POST['status'] ?? 'active') === 'active' ? 'selected' : ''; ?>>Active</option>
-                        <option value="inactive" <?php echo ($_POST['status'] ?? '') === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
-                    </select>
-                </div>
+            
             </div>
             
             <hr>

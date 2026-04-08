@@ -11,6 +11,79 @@ $auth->requirePermission('users');
 
 $db = Database::getInstance();
 $currentRole = $auth->role();
+$currentUserId = $auth->userId();
+
+/**
+ * Handle suspend / activate action
+ */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_action'], $_POST['user_id'])) {
+    $targetUserId = (int) $_POST['user_id'];
+    $userAction = trim($_POST['user_action']);
+
+    if ($targetUserId === $currentUserId) {
+        $_SESSION['flash_message'] = 'You cannot change your own account status.';
+        $_SESSION['flash_type'] = 'danger';
+        header('Location: index.php');
+        exit;
+    }
+
+    if (!in_array($userAction, ['activate', 'suspend'], true)) {
+        $_SESSION['flash_message'] = 'Invalid action.';
+        $_SESSION['flash_type'] = 'danger';
+        header('Location: index.php');
+        exit;
+    }
+
+    // Get target user first
+    $targetUser = $db->fetch(
+        "SELECT id, role, status, first_name, last_name FROM users WHERE id = ? LIMIT 1",
+        [$targetUserId]
+    );
+
+    if (!$targetUser) {
+        $_SESSION['flash_message'] = 'User not found.';
+        $_SESSION['flash_type'] = 'danger';
+        header('Location: index.php');
+        exit;
+    }
+
+    // Permission restriction:
+    // user_1 can only manage user_2, user_3, user_4
+    if ($currentRole === 'user_1' && !in_array($targetUser['role'], ['user_2', 'user_3', 'user_4'], true)) {
+        $_SESSION['flash_message'] = 'You are not allowed to manage this user.';
+        $_SESSION['flash_type'] = 'danger';
+        header('Location: index.php');
+        exit;
+    }
+
+    // If not super admin or user_1, adjust this if needed for your system
+    if (!in_array($currentRole, ['super_admin', 'user_1'], true)) {
+        $_SESSION['flash_message'] = 'You do not have permission to update user status.';
+        $_SESSION['flash_type'] = 'danger';
+        header('Location: index.php');
+        exit;
+    }
+
+    $newStatus = ($userAction === 'activate') ? 'active' : 'suspended';
+
+    $updated = $db->update(
+        'users',
+        ['status' => $newStatus],
+        'id = ?',
+        [$targetUserId]
+    );
+
+    if ($updated) {
+        $_SESSION['flash_message'] = 'User status updated successfully.';
+        $_SESSION['flash_type'] = 'success';
+    } else {
+        $_SESSION['flash_message'] = 'Failed to update user status.';
+        $_SESSION['flash_type'] = 'danger';
+    }
+
+    header('Location: index.php');
+    exit;
+}
 
 // Get filter parameters
 $roleFilter = $_GET['role'] ?? '';
@@ -93,10 +166,8 @@ $manageableRoles = $currentRole === 'super_admin'
                 </select>
             </div>
             <div class="col-md-4">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Filter
-                </button>
-                <a href="index.php" class="btn btn-outline-secondary">
+
+                <a href="index.php" class="btn btn-danger">
                     <i class="bi bi-x-lg"></i> Clear
                 </a>
             </div>
@@ -147,14 +218,18 @@ $manageableRoles = $currentRole === 'super_admin'
                                     $color = '#F8D7DA';
                                 }
                             ?>
-                    <tr>
+                        <tr>
                         <td><strong><?php echo clean($user['employee_id']); ?></strong></td>
                         <td>
-
                             <div class="d-flex align-items-center">
                                 <div class="user-avatar me-2" style="width: 32px; height: 32px; font-size: 0.8rem; background: <?php echo $color; ?>">
-                                    <?php echo strtoupper(substr($user['full_name'], 0, 1)); ?>
+                                        <?php
+                                            $first = isset($user['first_name']) ? substr($user['first_name'], 0, 1) : '';
+                                            $last  = isset($user['last_name']) ? substr($user['last_name'], 0, 1) : '';
+                                            echo strtoupper($first . $last);
+                                        ?>
                                 </div>
+                                
                                 <?php echo clean($user['full_name']); ?>
                             </div>
                         </td>
@@ -200,6 +275,25 @@ $manageableRoles = $currentRole === 'super_admin'
                                                 </div>
                                             </a>
                                         </div>
+                                        <form method="POST" class="m-0">
+                                            <input type="hidden" name="user_id" value="<?php echo (int) $user['id']; ?>">
+
+                                            <?php if ($user['status'] === 'active'): ?>
+                                                <input type="hidden" name="user_action" value="suspend">
+                                                <button type="submit"
+                                                        class="dropdown-item text-danger"
+                                                        onclick="return confirm('Are you sure you want to suspend this user?');">
+                                                    <i class="bi bi-pause me-2"></i>Suspend
+                                                </button>
+                                            <?php else: ?>
+                                                <input type="hidden" name="user_action" value="activate">
+                                                <button type="submit"
+                                                        class="dropdown-item text-success"
+                                                        onclick="return confirm('Are you sure you want to activate this user?');">
+                                                    <i class="bi bi-play me-2"></i>Activate
+                                                </button>
+                                            <?php endif; ?>
+                                        </form>
                                     </div>
                                 </div>
                             <?php else: ?>
