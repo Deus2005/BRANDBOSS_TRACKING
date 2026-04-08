@@ -43,6 +43,8 @@ class Auth {
         // Set session data
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
+        $_SESSION['first_name'] = $user['first_name'];
+        $_SESSION['last_name'] = $user['last_name'];
         $_SESSION['full_name'] = $user['full_name'];
         $_SESSION['role'] = $user['role'];
         $_SESSION['email'] = $user['email'];
