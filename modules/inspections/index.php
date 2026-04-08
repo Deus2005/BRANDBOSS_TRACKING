@@ -37,7 +37,7 @@ if ($month) {
 }
 
 if ($overdue === '1') {
-    $where[] = "isc.status = 'pending' AND isc.scheduled_date <= CURDATE()"; 
+    $where[] = "isc.status = 'pending' AND isc.scheduled_date <= CURDATE()";
 }
 
 $whereClause = implode(' AND ', $where);
@@ -45,8 +45,8 @@ $whereClause = implode(' AND ', $where);
 $sql = "SELECT isc.*, 
                ir.report_code, ir.installation_date, ir.latitude, ir.longitude,
                ia.area_name, ia.city,
-               u.full_name as installer_name,
-               insp.full_name as inspector_name,
+               CONCAT(u.first_name, ' ', u.last_name) as installer_name,
+               CONCAT(insp.first_name, ' ', insp.last_name) as inspector_name,
                (SELECT id FROM inspection_reports WHERE schedule_id = isc.id LIMIT 1) as inspection_report_id
         FROM inspection_schedules isc
         JOIN installation_reports ir ON isc.installation_report_id = ir.id
@@ -126,33 +126,28 @@ $totalCompleted = $db->count('inspection_schedules', "status = 'completed'");
     <div class="card-body">
         <form method="GET" class="row g-3">
             <div class="col-md-3">
-                <select name="status" class="form-select">
-                    <option value="">All Status</option>
-                    <option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                    <option value="scheduled" <?php echo $status === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
-                    <option value="completed" <?php echo $status === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                    <option value="overdue" <?php echo $status === 'overdue' ? 'selected' : ''; ?>>Overdue</option>
-                </select>
+                <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="">All Status</option>
+            <option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>Pending</option>
+            <option value="scheduled" <?php echo $status === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
+            <option value="completed" <?php echo $status === 'completed' ? 'selected' : ''; ?>>Completed</option>
+            <option value="overdue" <?php echo $status === 'overdue' ? 'selected' : ''; ?>>Overdue</option>
+        </select>
             </div>
             <div class="col-md-2">
-                <select name="month" class="form-select">
-                    <option value="">All Months</option>
-                    <?php for ($i = 1; $i <= 6; $i++): ?>
-                    <option value="<?php echo $i; ?>" <?php echo $month == $i ? 'selected' : ''; ?>>Month <?php echo $i; ?></option>
-                    <?php endfor; ?>
-                </select>
+                <select name="month" class="form-select" onchange="this.form.submit()">
+            <option value="">All Months</option>
+            <?php for ($i = 1; $i <= 6; $i++): ?>
+            <option value="<?php echo $i; ?>" <?php echo $month == $i ? 'selected' : ''; ?>>
+                Month <?php echo $i; ?>
+            </option>
+            <?php endfor; ?>
+        </select>
             </div>
             <div class="col-md-3">
-                <div class="form-check form-check-inline mt-2">
-                    <input class="form-check-input" type="checkbox" name="overdue" value="1" id="overdueCheck"
-                           <?php echo $overdue === '1' ? 'checked' : ''; ?>>
-                    <label class="form-check-label" for="overdueCheck">Overdue Only</label>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <a href="index.php" class="btn btn-outline-secondary">
-                    <i class="bi bi-x-lg"></i> Clear
-                </a>
+                <a href="index.php" class="btn btn-danger text-white">
+                 <i class="bi bi-x-lg"></i> Clear
+    </a>
             </div>
         </form>
     </div>
@@ -167,7 +162,7 @@ $totalCompleted = $db->count('inspection_schedules', "status = 'completed'");
                     <tr>
                         <th>Installation</th>
                         <th>Area</th>
-                        <th class="text-center" style="display: none;">Month</th>
+                        <th class="text-center">Month</th>
                         <th>Scheduled</th>
                         <th>Status</th>
                         <th class="text-center">Actions</th>
@@ -197,10 +192,10 @@ $totalCompleted = $db->count('inspection_schedules', "status = 'completed'");
                             <?php echo clean($sched['area_name']); ?>
                             <br><small class="text-muted"><?php echo clean($sched['city']); ?></small>
                         </td>
-                        <td class="text-center" style="display: none;">
+                        <td class="text-center">
                             <span class="badge bg-primary fs-6">
                                 <?php echo $sched['month_number']; ?>/6
-                            </span> 
+                            </span>
                         </td>
                         <td>
                             <?php echo formatDate($sched['scheduled_date']); ?>
@@ -210,56 +205,36 @@ $totalCompleted = $db->count('inspection_schedules', "status = 'completed'");
                         </td>
                         <td><?php echo statusBadge($sched['status']); ?></td>
                         <td class="text-center">
-                            <div class="action-btn">
-                                <a href="#" class="menu-toggle" style="font-size:1.5rem;text-decoration:none;color:#000;">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </a>
-                                <div class="action-dropdown">
-                                    <?php if ($sched['inspection_report_id']): ?>
-                                    <div class="edit-container">
-                                        <a href="view.php?id=<?php echo $sched['inspection_report_id']; ?>" class="btn-report" title="View Report">
-                                            <div class="block-container">
-                                                <div class="view icon">
-                                                    <i class="bi bi-eye"></i>
-                                                </div>
-                                                <div class="view text">
-                                                    View Report
-                                                </div>                                                 
-                                            </div>
-                                        </a>
-                                    </div>
-                                    <?php endif; ?>
-                                    <?php if (in_array($sched['status'], ['pending', 'scheduled']) && $auth->can('inspections')): ?>
-                                    <div class="activiation">
-                                        <a href="create.php?schedule_id=<?php echo $sched['id']; ?>" class="btn-toggle" 
-                                            title="Conduct Inspection">
-                                            <div class="block-container">
-                                                <div class="activation icon">
-                                                    <i class="bi bi-clipboard-check"></i>
-                                                </div>
-                                                <div class="activation text">
-                                                    Conduct Inspection
-                                                </div>
-                                            </div>
-                                        </a>    
-                                    </div>
-                                    <?php endif; ?>                              
-                                    <div class="delete">
-                                        <a href="map.php?lat=<?php echo $sched['latitude']; ?>&lng=<?php echo $sched['longitude']; ?>" 
-                                        class="btn-map" title="View Location">
-                                            <div class="block-container">
-                                                <div class="map icon">
-                                                    <i class="bi bi-geo-alt"></i>
-                                                </div>
-                                                <div class="map text">
-                                                    Map
-                                                </div>
-                                            </div>
-                                        </a>                                        
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
+    <div class="droplist">
+        <button 
+            class="btn btn-sm p-0 text-muted" 
+            type="button" 
+            data-bs-toggle="dropdown"
+            style="border: none; background: none;">
+            
+            <i class="bi bi-three-dots-vertical" style="font-size: 18px;"></i>
+        </button>
+
+        <ul class="dropdown-menu dropdown-menu-end">
+
+            <?php if ($sched['inspection_report_id']): ?>
+            <li>
+                <a class="dropdown-item" href="view.php?id=<?php echo $sched['inspection_report_id']; ?>">
+                    <i class="bi bi-eye me-2"></i> View Report
+                </a>
+            </li>
+            <?php endif; ?>
+
+            <?php if (in_array($sched['status'], ['pending', 'scheduled']) && $auth->can('inspections')): ?>
+            <li>
+                <a class="dropdown-item" href="create.php?schedule_id=<?php echo $sched['id']; ?>">
+                    <i class="bi bi-clipboard-check me-2"></i> Conduct Inspection
+                </a>
+            </li>
+            <?php endif; ?>
+        </ul>
+    </div>
+</td>
                     </tr>
                     <?php endforeach; ?>
                     <?php endif; ?>
@@ -267,7 +242,7 @@ $totalCompleted = $db->count('inspection_schedules', "status = 'completed'");
             </table>
         </div>
     </div>
-
+    
     <?php if ($result['total_pages'] > 1): ?>
     <div class="card-footer">
         <div class="d-flex justify-content-between align-items-center">
@@ -281,52 +256,4 @@ $totalCompleted = $db->count('inspection_schedules', "status = 'completed'");
     <?php endif; ?>
 </div>
 
-<script src="../../assets/js/action.js"></script>
-<?php 
-$extraScripts = <<<'SCRIPT'
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var form = document.querySelector('form');
-    if (!form) return;
-
-    var searchInput = form.querySelector('input[name="search"]');
-    var filterSelects = form.querySelectorAll('select');
-    var overdueCheckbox = form.querySelector('input[name="overdue"]');
-
-    // Debounce for typing
-    var autoSubmit = App.debounce(function() {
-        form.submit();
-    }, 800);
-
-    if (searchInput) {
-        searchInput.focus();
-
-        setTimeout(function(){
-            var valueLength = searchInput.value.length;
-            searchInput.setSelectionRange(valueLength, valueLength);
-        }, 0);
-
-        searchInput.addEventListener('input', function() {
-            autoSubmit();
-        });
-    }
-
-    // Select filters
-    filterSelects.forEach(function(select) {
-        select.addEventListener('change', function() {
-            form.submit();
-        });
-    });
-
-    // Overdue checkbox
-    if (overdueCheckbox) {
-        overdueCheckbox.addEventListener('change', function() {
-            form.submit();
-        });
-    }
-});
-</script>
-SCRIPT;
-
-require_once '../../includes/footer.php'; 
-?>
+<?php require_once '../../includes/footer.php'; ?>

@@ -32,8 +32,9 @@ $inspection = $db->fetch(
             ir.id as installation_id, ir.report_code as installation_code, ir.installation_date,
             ir.latitude as install_lat, ir.longitude as install_lng,
             ia.area_name, ia.city, ia.address,
-            u1.full_name as inspector_name, u1.phone as inspector_phone,
-            u2.full_name as installer_name
+            CONCAT(u1.first_name, ' ', u1.last_name) as inspector_name, u1.phone as inspector_phone,
+            CONCAT(u2.first_name, ' ', u2.last_name) as installer_name
+            
      FROM inspection_reports insp
      JOIN inspection_schedules isc ON insp.schedule_id = isc.id
      JOIN installation_reports ir ON isc.installation_report_id = ir.id
@@ -105,7 +106,10 @@ foreach ($inspectionItems as $item) {
     <div class="col-lg-4 mb-4">
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-info-circle me-2"></i>Inspection Information
+                <span class="d-flex align-text-center">
+                <span class="bi bi-info-circle me-2"></span>
+                Inspection Information
+        </span> 
             </div>
             <div class="card-body">
                 <div class="text-center mb-3">
@@ -132,12 +136,23 @@ foreach ($inspectionItems as $item) {
                         <td class="text-muted" width="40%">Inspector:</td>
                         <td><strong><?php echo clean($inspection['inspector_name']); ?></strong></td>
                     </tr>
-                    <?php if ($inspection['inspector_phone']): ?>
-                    <tr>
-                        <td class="text-muted">Phone:</td>
-                        <td><a href="tel:<?php echo $inspection['inspector_phone']; ?>"><?php echo clean($inspection['inspector_phone']); ?></a></td>
-                    </tr>
-                    <?php endif; ?>
+                    <?php if (!empty($inspection['inspector_phone'])): ?>
+<tr>
+    <td class="text-muted">Phone:</td>
+    <td>
+        <div class="d-flex align-items-center gap-1">
+            <span><?php echo clean($inspection['inspector_phone']); ?></span>
+            <button
+                type="button"
+                class="btn p-0"
+                style="border: none; background: none;"
+                onclick="copyPhone('<?php echo addslashes($inspection['inspector_phone']); ?>', this)">
+                <i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>
+            </button>
+        </div>
+    </td>
+</tr>
+<?php endif; ?>
                     <tr>
                         <td class="text-muted">Inspection Date:</td>
                         <td><?php echo formatDate($inspection['inspection_date']); ?></td>
@@ -156,7 +171,10 @@ foreach ($inspectionItems as $item) {
         
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-camera me-2"></i>Installation Reference
+                <span class="d-flex align-text-center">
+                <span class="bi bi-camera me-2"></span>
+                Installation Reference
+                    </span>
             </div>
             <div class="card-body">
                 <p class="mb-2">
@@ -192,7 +210,10 @@ foreach ($inspectionItems as $item) {
         <?php if ($inspection['latitude'] && $inspection['longitude']): ?>
         <div class="card">
             <div class="card-header bg-primary">
-                <i class="bi bi-geo-alt me-2"></i>GPS Location
+                <span class="d-flex align-text-center">
+                <span class="bi bi-geo-alt me-2"></span>
+                GPS Location
+        </span>
             </div>
             <div class="card-body">
                 <div class="row text-center">
@@ -242,8 +263,11 @@ foreach ($inspectionItems as $item) {
         
         <!-- Inspection Items -->
         <div class="card">
-            <div class="card-header bg-primary">
-                <i class="bi bi-list-check me-2"></i>Item Inspection Results
+            <div class="card-header bg-dark text-white">
+                <span class="d-flex align-text-center">
+                <span class="bi bi-list-check me-2"></span>
+                Item Inspection Results
+        </span>
             </div>
             <div class="card-body">
                 <?php foreach ($inspectionItems as $index => $item): ?>
@@ -258,7 +282,7 @@ foreach ($inspectionItems as $item) {
                 $itemStatusColor = $statusColors[$item['item_status']] ?? 'secondary';
                 ?>
                 <div class="card mb-3 <?php echo $index === count($inspectionItems) - 1 ? 'mb-0' : ''; ?> border-<?php echo $itemStatusColor; ?>">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <span>
                             <strong><?php echo clean($item['item_code']); ?></strong> - 
                             <?php echo clean($item['item_name']); ?>
@@ -294,16 +318,39 @@ foreach ($inspectionItems as $item) {
                         </div>
                         <?php endif; ?>
                         
-                        <?php if ($item['photo']): ?>
-                        <div class="mb-3">
-                            <small class="text-muted d-block mb-2">Inspection Photo:</small>
-                            <a href="<?php echo APP_URL; ?>/uploads/inspections/<?php echo $item['photo']; ?>" target="_blank">
-                                <img src="<?php echo APP_URL; ?>/uploads/inspections/<?php echo $item['photo']; ?>" 
-                                     class="img-thumbnail" style="max-height: 150px;">
-                            </a>
-                        </div>
-                        <?php endif; ?>
-                        
+                       <?php if (!empty($item['photo'])): ?>
+<?php 
+$photoPath = APP_URL . '/uploads/inspections/' . $item['photo'];
+$modalId = 'photoModal_' . $index; // unique per item
+?>
+
+<div class="mb-3">
+    <small class="text-muted d-block mb-2">Inspection Photo:</small>
+
+    <!-- Thumbnail (click to open modal) -->
+    <img src="<?php echo $photoPath; ?>" 
+         class="img-thumbnail"
+         style="max-height: 150px; cursor: pointer;"
+         data-bs-toggle="modal"
+         data-bs-target="#<?php echo $modalId; ?>">
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="<?php echo $modalId; ?>" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-transparent border-0">
+
+            <!-- Close button -->
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white" 
+                    data-bs-dismiss="modal"></button>
+
+            <!-- Image -->
+            <img src="<?php echo $photoPath; ?>" 
+                 class="img-fluid rounded">
+        </div>
+    </div>
+</div>
+<?php endif; ?>
                         <?php if ($item['remarks']): ?>
                         <p class="mb-2"><small><strong>Remarks:</strong> <?php echo clean($item['remarks']); ?></small></p>
                         <?php endif; ?>
@@ -328,4 +375,18 @@ foreach ($inspectionItems as $item) {
     </div>
 </div>
 
+<script>
+function copyPhone(number, button) {
+    navigator.clipboard.writeText(number).then(function() {
+        button.innerHTML = '<i class="bi bi-check-lg text-success" style="font-size: 14px;"></i>';
+
+        setTimeout(function() {
+            button.innerHTML = '<i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>';
+        }, 1500);
+    }).catch(function(err) {
+        console.error('Copy failed:', err);
+        alert('Failed to copy number');
+    });
+}
+</script>
 <?php require_once '../../includes/footer.php'; ?>
