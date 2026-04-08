@@ -30,7 +30,7 @@ $schedule = $db->fetch(
             ir.id as installation_report_id, ir.report_code, ir.installation_date, 
             ir.latitude, ir.longitude, ir.location_address,
             ia.area_name, ia.city,
-            u.full_name as installer_name
+            CONCAT(u.first_name, ' ', u.last_name) as installer_name
      FROM inspection_schedules isc
      JOIN installation_reports ir ON isc.installation_report_id = ir.id
      JOIN assignments a ON ir.assignment_id = a.id
