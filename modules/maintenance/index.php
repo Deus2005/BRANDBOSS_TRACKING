@@ -52,8 +52,8 @@ $whereClause = implode(' AND ', $where);
 $sql = "SELECT mt.*, 
                ir.report_code, ir.latitude, ir.longitude,
                ia.area_name, ia.city,
-               u1.full_name as assigned_to_name,
-               u2.full_name as created_by_name
+               CONCAT(u1.first_name, ' ', u1.last_name) as assigned_to_name,
+               CONCAT(u2.first_name, ' ', u2.last_name) as created_by_name
         FROM maintenance_tickets mt
         JOIN installation_reports ir ON mt.installation_report_id = ir.id
         JOIN assignments a ON ir.assignment_id = a.id
@@ -73,8 +73,13 @@ $openCount = $db->count('maintenance_tickets', "status IN ('open', 'assigned', '
 $pendingItemsCount = $db->count('maintenance_tickets', "status = 'pending_items'");
 $completedCount = $db->count('maintenance_tickets', "status = 'completed'");
 
-// Maintenance users for assignment
-$maintenanceUsers = $db->fetchAll("SELECT id, full_name FROM users WHERE role = 'user_4' AND status = 'active' ORDER BY full_name");
+$maintenanceUsers = $db->fetchAll("
+    SELECT id, first_name, last_name 
+    FROM users 
+    WHERE role = 'user_4' 
+      AND status = 'active'
+    ORDER BY first_name, last_name
+");
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -137,7 +142,7 @@ $maintenanceUsers = $db->fetchAll("SELECT id, full_name FROM users WHERE role = 
     <div class="card-body">
         <form method="GET" class="row g-3">
             <div class="col-md-3">
-                <select name="status" class="form-select">
+                <select name="status" class="form-select" onchange="this.form.submit()">
                     <option value="">All Status</option>
                     <option value="open" <?php echo $status === 'open' ? 'selected' : ''; ?>>Open</option>
                     <option value="assigned" <?php echo $status === 'assigned' ? 'selected' : ''; ?>>Assigned</option>
@@ -147,8 +152,9 @@ $maintenanceUsers = $db->fetchAll("SELECT id, full_name FROM users WHERE role = 
                     <option value="closed" <?php echo $status === 'closed' ? 'selected' : ''; ?>>Closed</option>
                 </select>
             </div>
+
             <div class="col-md-2">
-                <select name="type" class="form-select">
+                <select name="type" class="form-select" onchange="this.form.submit()">
                     <option value="">All Types</option>
                     <option value="repair" <?php echo $type === 'repair' ? 'selected' : ''; ?>>Repair</option>
                     <option value="replacement" <?php echo $type === 'replacement' ? 'selected' : ''; ?>>Replacement</option>
@@ -156,8 +162,9 @@ $maintenanceUsers = $db->fetchAll("SELECT id, full_name FROM users WHERE role = 
                     <option value="general" <?php echo $type === 'general' ? 'selected' : ''; ?>>General</option>
                 </select>
             </div>
+
             <div class="col-md-2">
-                <select name="priority" class="form-select">
+                <select name="priority" class="form-select" onchange="this.form.submit()">
                     <option value="">All Priority</option>
                     <option value="critical" <?php echo $priority === 'critical' ? 'selected' : ''; ?>>Critical</option>
                     <option value="high" <?php echo $priority === 'high' ? 'selected' : ''; ?>>High</option>
@@ -165,11 +172,9 @@ $maintenanceUsers = $db->fetchAll("SELECT id, full_name FROM users WHERE role = 
                     <option value="low" <?php echo $priority === 'low' ? 'selected' : ''; ?>>Low</option>
                 </select>
             </div>
+
             <div class="col-md-5">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Filter
-                </button>
-                <a href="index.php" class="btn btn-outline-secondary">
+                <a href="index.php" class="btn btn-danger">
                     <i class="bi bi-x-lg"></i> Clear
                 </a>
             </div>
@@ -248,22 +253,42 @@ $maintenanceUsers = $db->fetchAll("SELECT id, full_name FROM users WHERE role = 
                             <br><small class="text-muted">by <?php echo clean($ticket['created_by_name']); ?></small>
                         </td>
                         <td class="text-center">
-                            <div class="btn-group btn-group-sm">
-                                <a href="view.php?id=<?php echo $ticket['id']; ?>" class="btn btn-outline-primary" title="View">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <?php if ($currentRole === 'user_4' && in_array($ticket['status'], ['assigned', 'in_progress'])): ?>
-                                <a href="work.php?id=<?php echo $ticket['id']; ?>" class="btn btn-outline-success" title="Work on Ticket">
-                                    <i class="bi bi-tools"></i>
-                                </a>
-                                <?php endif; ?>
-                                <?php if ($currentRole === 'user_4' && $ticket['status'] === 'assigned'): ?>
-                                <a href="request-items.php?ticket_id=<?php echo $ticket['id']; ?>" class="btn btn-outline-warning" title="Request Items">
-                                    <i class="bi bi-box-arrow-in-down"></i>
-                                </a>
-                                <?php endif; ?>
-                            </div>
-                        </td>
+    <div class="droplist">
+        <button 
+            class="btn btn-sm p-0 text-muted" 
+            type="button" 
+            data-bs-toggle="dropdown"
+            style="border: none; background: none;">
+            
+            <i class="bi bi-three-dots-vertical" style="font-size: 18px;"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+
+            <li>
+                <a class="dropdown-item" href="view.php?id=<?php echo $ticket['id']; ?>">
+                    <i class="bi bi-eye me-2"></i> View
+                </a>
+            </li>
+
+            <?php if ($currentRole === 'user_4' && in_array($ticket['status'], ['assigned', 'in_progress'])): ?>
+            <li>
+                <a class="dropdown-item" href="work.php?id=<?php echo $ticket['id']; ?>">
+                    <i class="bi bi-tools me-2"></i> Work on Ticket
+                </a>
+            </li>
+            <?php endif; ?>
+
+            <?php if ($currentRole === 'user_4' && $ticket['status'] === 'assigned'): ?>
+            <li>
+                <a class="dropdown-item" href="request-items.php?ticket_id=<?php echo $ticket['id']; ?>">
+                    <i class="bi bi-box-arrow-in-down me-2"></i> Request Items
+                </a>
+            </li>
+            <?php endif; ?>
+
+        </ul>
+    </div>
+</td>
                     </tr>
                     <?php endforeach; ?>
                     <?php endif; ?>
@@ -304,7 +329,9 @@ $maintenanceUsers = $db->fetchAll("SELECT id, full_name FROM users WHERE role = 
                         <select class="form-select" id="assignTo" name="assign_to" required>
                             <option value="">Select Personnel</option>
                             <?php foreach ($maintenanceUsers as $mUser): ?>
-                            <option value="<?php echo $mUser['id']; ?>"><?php echo clean($mUser['full_name']); ?></option>
+                           <option value="<?php echo $mUser['id']; ?>">
+    <?php echo clean($mUser['first_name'] . ' ' . $mUser['last_name']); ?>
+</option>
                             <?php endforeach; ?>
                         </select>
                     </div>
