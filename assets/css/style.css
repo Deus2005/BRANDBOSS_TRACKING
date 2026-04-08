@@ -1494,3 +1494,15 @@ input[type="password"]::-ms-reveal {
 .photo-thumbnail:hover img {
     opacity: 0.9;
 }
+
+/* Gray out readonly inputs */
+input[readonly] {
+    background-color: #e9ecef !important; /* Bootstrap gray */
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+/* Optional: smoother look */
+input.form-control[readonly] {
+    border-color: #ced4da;
+}
