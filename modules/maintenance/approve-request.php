@@ -26,7 +26,7 @@ if (!$requestId) {
 
 // Get request details
 $request = $db->fetch(
-    "SELECT mir.*, mt.ticket_code, mt.id as ticket_id, u.full_name as requested_by_name
+    "SELECT mir.*, mt.ticket_code, mt.id as ticket_id, CONCAT(u.first_name, ' ', u.last_name) as requested_by_name
      FROM maintenance_item_requests mir
      JOIN maintenance_tickets mt ON mir.ticket_id = mt.id
      JOIN users u ON mir.requested_by = u.id

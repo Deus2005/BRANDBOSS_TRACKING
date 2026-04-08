@@ -49,7 +49,7 @@ if (!$ticket) {
 
 // Get previous actions for this ticket
 $previousActions = $db->fetchAll(
-    "SELECT ma.*, u.full_name as performed_by_name
+    "SELECT ma.*, CONCAT(u.first_name, ' ', u.last_name) as performed_by_name
      FROM maintenance_actions ma
      JOIN users u ON ma.performed_by = u.id
      WHERE ma.ticket_id = ?
@@ -106,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $afterPhoto = $result['filename'];
                 }
             }
+            
             
             // Create maintenance action
             $db->insert('maintenance_actions', [
@@ -180,7 +181,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="col-lg-4 mb-4">
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-ticket me-2"></i>Ticket Details
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-ticket me-2"></span>
+                Ticket Details
+</span>
             </div>
             <div class="card-body">
                 <p class="mb-2"><strong>Code:</strong> <?php echo clean($ticket['ticket_code']); ?></p>
@@ -199,7 +203,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($ticket['item_name']): ?>
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-box me-2"></i>Affected Item
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-box me-2"></span>
+                Affected Item
+        </span>
             </div>
             <div class="card-body">
                 <p class="mb-2"><strong><?php echo clean($ticket['item_code']); ?></strong></p>
@@ -215,7 +222,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-info-circle me-2"></i>Description
+                <span class="d-flex align-text-center">
+                <span class="bi bi-info-circle me-2"></span>
+                Description
+        </span>
             </div>
             <div class="card-body">
                 <p class="mb-0"><?php echo nl2br(clean($ticket['description'])); ?></p>
@@ -249,7 +259,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Log Action Form -->
         <div class="card mb-4">
             <div class="card-header bg-primary">
-                <i class="bi bi-plus-circle me-2"></i>Log Maintenance Action
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-plus-circle me-2"></span>
+                Log Maintenance Action
+                    </span>
             </div>
             <div class="card-body">
                 <form method="POST" action="" enctype="multipart/form-data">
@@ -316,51 +329,76 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Action History -->
         <div class="card">
             <div class="card-header bg-primary">
-                <i class="bi bi-clock-history me-2"></i>Action History
+                <span class="d-flex align-text-center">
+                <span class="bi bi-clock-history me-2"></span>
+                Action History
+                    </span>
             </div>
-            <div class="card-body">
-                <?php if (empty($previousActions)): ?>
-                <div class="text-center text-muted py-4">
-                    <i class="bi bi-inbox display-6 d-block mb-2"></i>
-                    No actions logged yet
-                </div>
-                <?php else: ?>
-                <div class="timeline">
-                    <?php foreach ($previousActions as $action): ?>
-                    <div class="timeline-item">
-                        <div class="d-flex justify-content-between">
-                            <span class="badge bg-primary"><?php echo ucfirst($action['action_type']); ?></span>
-                            <small class="text-muted"><?php echo formatDateTime($action['created_at']); ?></small>
-                        </div>
-                        <p class="mb-1 mt-2"><?php echo nl2br(clean($action['description'])); ?></p>
-                        <small class="text-muted">by <?php echo clean($action['performed_by_name']); ?></small>
-                        
-                        <?php if ($action['before_photo'] || $action['after_photo']): ?>
-                        <div class="mt-2">
-                            <?php if ($action['before_photo']): ?>
-                            <a href="<?php echo APP_URL; ?>/uploads/maintenance/<?php echo $action['before_photo']; ?>" 
-                               target="_blank" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-image"></i> Before
-                            </a>
-                            <?php endif; ?>
-                            <?php if ($action['after_photo']): ?>
-                            <a href="<?php echo APP_URL; ?>/uploads/maintenance/<?php echo $action['after_photo']; ?>" 
-                               target="_blank" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-image"></i> After
-                            </a>
-                            <?php endif; ?>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
+           <div class="card-body">
+    <?php if (empty($previousActions)): ?>
+    <div class="text-center text-muted py-4">
+        <i class="bi bi-inbox display-6 d-block mb-2"></i>
+        No actions logged yet
+    </div>
+    <?php else: ?>
+    <div class="timeline">
+        <?php foreach ($previousActions as $action): ?>
+        <div class="timeline-item">
+            <div class="d-flex justify-content-between">
+                <span class="badge bg-primary"><?php echo ucfirst($action['action_type']); ?></span>
+                <small class="text-muted"><?php echo formatDateTime($action['created_at']); ?></small>
+            </div>
+
+            <p class="mb-1 mt-2"><?php echo nl2br(clean($action['description'])); ?></p>
+            <small class="text-muted">by <?php echo clean($action['performed_by_name']); ?></small>
+
+            <?php if ($action['before_photo'] || $action['after_photo']): ?>
+            <div class="mt-2">
+                <?php if ($action['before_photo']): ?>
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary open-image-btn"
+                    data-image="<?php echo(APP_URL . '/uploads/maintenance/' . $action['before_photo']); ?>">
+                    <i class="bi bi-image"></i> Before
+                </button>
+                <?php endif; ?>
+
+                <?php if ($action['after_photo']): ?>
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary open-image-btn"
+                    data-image="<?php echo(APP_URL . '/uploads/maintenance/' . $action['after_photo']); ?>">
+                    <i class="bi bi-image"></i> After
+                </button>
                 <?php endif; ?>
             </div>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+</div>
         </div>
     </div>
 </div>
 
+<div id="imageViewer" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:99999;">
+    <button
+        type="button"
+        id="closeImageViewer"
+        class="btn btn-light"
+        style="position:absolute; top:15px; left:15px; z-index:100000;">
+        <i class="bi bi-arrow-left"></i> Back
+    </button>
+
+    <img
+        id="imageViewerImg"
+        src=""
+        alt="Preview"
+        style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); max-width:95%; max-height:90%; object-fit:contain;">
+</div>
 <?php 
+
 $extraScripts = <<<'SCRIPT'
 <script>
 // Get GPS
@@ -370,6 +408,30 @@ App.getLocation()
         document.getElementById('longitude').value = coords.longitude;
     })
     .catch(err => console.log('GPS not available'));
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const viewer = document.getElementById('imageViewer');
+    const viewerImg = document.getElementById('imageViewerImg');
+    const closeBtn = document.getElementById('closeImageViewer');
+    const openBtns = document.querySelectorAll('.open-image-btn');
+
+    openBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const imageSrc = this.getAttribute('data-image');
+            viewerImg.src = imageSrc;
+            viewer.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    closeBtn.addEventListener('click', function () {
+        viewer.style.display = 'none';
+        viewerImg.src = '';
+        document.body.style.overflow = '';
+    });
+});
 </script>
 SCRIPT;
 
