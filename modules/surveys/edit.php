@@ -371,7 +371,7 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                                     <input type="hidden" name="questions[<?php echo $index; ?>][type]" value="<?php echo $q['question_type']; ?>">
                                     <?php endif; ?>
                                 </div>
-                            </div>
+                            </div>  
                             
                             <!-- Options for radio/checkbox/dropdown -->
                             <div class="mb-3 options-container" style="<?php echo in_array($q['question_type'], ['radio', 'checkbox', 'dropdown']) ? '' : 'display: none;'; ?>">
