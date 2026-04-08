@@ -24,6 +24,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $allowMultiple = isset($_POST['allow_multiple']) ? 1 : 0;
     $targetRoles = isset($_POST['target_roles']) ? json_encode($_POST['target_roles']) : null;
     $questions = $_POST['questions'] ?? [];
+
+    // SET SURVEY STATUS BASED ON BUTTON CLICKED
+    $action = $_POST['action'] ?? 'draft';
+$status = $_POST['status'] ?? 'draft';
+
+if (!in_array($status, ['draft', 'active', 'closed'], true)) {
+    $status = 'draft';
+}
     
     $errors = [];
     
@@ -57,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'is_anonymous' => $isAnonymous,
                 'allow_multiple' => $allowMultiple,
                 'target_roles' => $targetRoles,
-                'status' => 'draft',
+                'status' => $status,
                 'created_by' => $auth->userId()
             ]);
             
@@ -88,10 +96,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Log activity
             $auth->logActivity($auth->userId(), 'created_survey', 'surveys', 'surveys', $surveyId);
-            
-            setFlashMessage('Survey created successfully!', 'success');
-            header('Location: edit.php?id=' . $surveyId);
-            exit;
+
+            if ($status === 'draft') {
+                setFlashMessage('Saved as draft!', 'success');
+}           
+            elseif ($status === 'active') {
+                setFlashMessage('Survey published successfully!', 'success');
+
+} 
+
+header('Location: edit.php?id=' . $surveyId);
+exit;
             
         } catch (Exception $e) {
             $db->rollBack();
@@ -99,18 +114,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
-// Question types with their properties
-$questionTypes = [
-    'text' => ['label' => 'Short Text', 'icon' => 'bi-input-cursor-text', 'hasOptions' => false],
-    'textarea' => ['label' => 'Long Text', 'icon' => 'bi-textarea-t', 'hasOptions' => false],
-    'radio' => ['label' => 'Single Choice', 'icon' => 'bi-ui-radios', 'hasOptions' => true],
-    'checkbox' => ['label' => 'Multiple Choice', 'icon' => 'bi-ui-checks', 'hasOptions' => true],
-    'dropdown' => ['label' => 'Dropdown', 'icon' => 'bi-menu-button-wide', 'hasOptions' => true],
-    'rating' => ['label' => 'Rating Scale', 'icon' => 'bi-star', 'hasOptions' => false, 'hasRange' => true],
-    'number' => ['label' => 'Number', 'icon' => 'bi-123', 'hasOptions' => false],
-    'date' => ['label' => 'Date', 'icon' => 'bi-calendar-date', 'hasOptions' => false]
-];
 
 // Available roles for targeting
 $availableRoles = [
@@ -142,11 +145,14 @@ $availableRoles = [
 <form method="POST" id="surveyForm">
     <div class="row">
         <!-- Survey Details -->
-        <div class="col-lg-4">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="bi bi-info-circle me-2"></i>Survey Details
-                </div>
+<div class="col-lg-4">
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <span class="d-flex align-items-center">
+                <i class="bi bi-info-circle me-2"></i>
+                Survey Details
+            </span>
+        </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label class="form-label">Title <span class="text-danger">*</span></label>
@@ -215,9 +221,7 @@ $availableRoles = [
             
             <!-- Question Types Reference -->
             <div class="card">
-                <div class="card-header">
-                    <i class="bi bi-question-circle me-2"></i>Question Types
-                </div>
+
                 <div class="card-body p-2">
                     <div class="list-group list-group-flush">
                         <?php foreach ($questionTypes as $type => $info): ?>
@@ -235,30 +239,32 @@ $availableRoles = [
         <!-- Questions Builder -->
         <div class="col-lg-8">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-list-check me-2"></i>Questions</span>
-                    <button type="button" class="btn btn-primary btn-sm" id="addQuestion">
-                        <i class="bi bi-plus-lg"></i> Add Question
-                    </button>
-                </div>
                 <div class="card-body" id="questionsContainer">
                     <!-- Questions will be added here dynamically -->
                     <div class="text-center py-5 text-muted" id="emptyState">
                         <i class="bi bi-clipboard2 display-4 d-block mb-3"></i>
                         <p>No questions added yet</p>
-                        <button type="button" class="btn btn-outline-primary" onclick="addQuestion()">
+                       <button type="button" class="btn btn-primary btn-sm" id="addQuestion">
                             <i class="bi bi-plus-lg"></i> Add Your First Question
                         </button>
                     </div>
                 </div>
             </div>
             
+            <input type="hidden" name="status" id="surveyStatus" value="draft">
+
             <div class="d-flex justify-content-end gap-2 mt-3">
                 <a href="index.php" class="btn btn-outline-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save"></i> Save as Draft
-                </button>
-            </div>
+
+            <button type="submit" class="btn btn-secondary" onclick="document.getElementById('surveyStatus').value='draft'">
+                 <i class="bi bi-save"></i> Save as Draft
+            </button>
+
+            <button type="submit" class="btn text-white" style="background:#b30000;"
+                 onclick="document.getElementById('surveyStatus').value='active'">
+                <i class="bi bi-check-circle"></i> Publish
+            </button>
+        </div>
         </div>
     </div>
 </form>

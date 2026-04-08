@@ -60,25 +60,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $allowMultiple = isset($_POST['allow_multiple']) ? 1 : 0;
     $targetRoles = isset($_POST['target_roles']) ? json_encode($_POST['target_roles']) : null;
     $newQuestions = $_POST['questions'] ?? [];
-    
+
     $errors = [];
-    
+
     if (empty($title)) {
         $errors[] = 'Survey title is required';
     }
-    
+
     if (empty($newQuestions)) {
         $errors[] = 'At least one question is required';
     }
-    
+
     if ($startDate && $endDate && strtotime($startDate) > strtotime($endDate)) {
         $errors[] = 'End date must be after start date';
     }
-    
+
     if (empty($errors)) {
         try {
             $db->beginTransaction();
-            
+
             // Update survey
             $db->update('surveys', [
                 'title' => $title,
@@ -89,23 +89,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'allow_multiple' => $allowMultiple,
                 'target_roles' => $targetRoles
             ], 'id = ?', [$surveyId]);
-            
+
             // Delete existing questions (only if no responses yet)
             $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
-            
+
             if ($responseCount == 0) {
                 $db->delete('survey_questions', 'survey_id = ?', [$surveyId]);
-                
+
                 // Insert new questions
                 foreach ($newQuestions as $index => $q) {
                     if (empty(trim($q['text']))) continue;
-                    
+
                     $options = null;
                     if (in_array($q['type'], ['radio', 'checkbox', 'dropdown']) && !empty($q['options'])) {
                         $optArray = array_filter(array_map('trim', explode("\n", $q['options'])));
                         $options = json_encode(array_values($optArray));
                     }
-                    
+
                     $db->insert('survey_questions', [
                         'survey_id' => $surveyId,
                         'question_text' => trim($q['text']),
@@ -122,15 +122,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Only update existing questions' text (not structure) if has responses
                 // This is a simplified approach - in production you might want more granular control
             }
-            
+
             $db->commit();
-            
+
             $auth->logActivity($auth->userId(), 'updated_survey', 'surveys', 'surveys', $surveyId);
-            
+
             setFlashMessage('Survey updated successfully!', 'success');
             header('Location: edit.php?id=' . $surveyId);
             exit;
-            
+
         } catch (Exception $e) {
             $db->rollBack();
             $errors[] = 'Failed to update survey: ' . $e->getMessage();
@@ -212,12 +212,12 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                         <input type="text" class="form-control" name="title" required
                                value="<?php echo clean($formData['title'] ?? ''); ?>">
                     </div>
-                    
+
                     <div class="mb-3">
                         <label class="form-label">Description</label>
                         <textarea class="form-control" name="description" rows="3"><?php echo clean($formData['description'] ?? ''); ?></textarea>
                     </div>
-                    
+
                     <div class="row mb-3">
                         <div class="col-6">
                             <label class="form-label">Start Date</label>
@@ -230,7 +230,7 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                                    value="<?php echo clean($formData['end_date'] ?? ''); ?>">
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label class="form-label">Target Respondents</label>
                         <div class="border rounded p-2">
@@ -247,7 +247,7 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                             <?php endforeach; ?>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="is_anonymous" id="is_anonymous"
@@ -258,7 +258,7 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                             </label>
                         </div>
                     </div>
-                    
+
                     <div class="mb-0">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="allow_multiple" id="allow_multiple"
@@ -271,7 +271,7 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                     </div>
                 </div>
             </div>
-            
+
             <!-- Stats Card -->
             <div class="card">
                 <div class="card-header">
@@ -290,7 +290,7 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                         <span class="text-muted">Created:</span>
                         <strong><?php echo formatDateTime($survey['created_at']); ?></strong>
                     </div>
-                    
+
                     <?php if ($responseCount > 0): ?>
                     <hr>
                     <a href="results.php?id=<?php echo $surveyId; ?>" class="btn btn-info btn-sm w-100">
@@ -300,7 +300,7 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                 </div>
             </div>
         </div>
-        
+
         <!-- Questions Builder -->
         <div class="col-lg-8">
             <div class="card">
@@ -372,14 +372,15 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                                     <?php endif; ?>
                                 </div>
                             </div>
-                            
+                            </div>  
+
                             <!-- Options for radio/checkbox/dropdown -->
                             <div class="mb-3 options-container" style="<?php echo in_array($q['question_type'], ['radio', 'checkbox', 'dropdown']) ? '' : 'display: none;'; ?>">
                                 <label class="form-label">Options (one per line)</label>
                                 <textarea class="form-control question-options" name="questions[<?php echo $index; ?>][options]" rows="4"
                                           <?php echo $responseCount > 0 ? 'readonly' : ''; ?>><?php echo clean($options); ?></textarea>
                             </div>
-                            
+
                             <!-- Rating range -->
                             <div class="row mb-3 rating-container" style="<?php echo $q['question_type'] === 'rating' ? '' : 'display: none;'; ?>">
                                 <div class="col-6">
@@ -395,7 +396,7 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                                            <?php echo $responseCount > 0 ? 'readonly' : ''; ?>>
                                 </div>
                             </div>
-                            
+
                             <!-- Placeholder -->
                             <div class="mb-3 placeholder-container" style="<?php echo in_array($q['question_type'], ['text', 'textarea', 'number']) ? '' : 'display: none;'; ?>">
                                 <label class="form-label">Placeholder Text</label>
@@ -403,7 +404,7 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                                        value="<?php echo clean($q['placeholder'] ?? ''); ?>"
                                        <?php echo $responseCount > 0 ? 'readonly' : ''; ?>>
                             </div>
-                            
+
                             <div class="form-check">
                                 <input class="form-check-input question-required" type="checkbox" 
                                        name="questions[<?php echo $index; ?>][required]"
@@ -420,7 +421,7 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                     <?php endif; ?>
                 </div>
             </div>
-            
+
             <div class="d-flex justify-content-end gap-2 mt-3">
                 <a href="index.php" class="btn btn-outline-secondary">Cancel</a>
                 <button type="submit" class="btn btn-primary">
@@ -474,12 +475,12 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                     </select>
                 </div>
             </div>
-            
+
             <div class="mb-3 options-container" style="display: none;">
                 <label class="form-label">Options (one per line)</label>
                 <textarea class="form-control question-options" name="questions[0][options]" rows="4"></textarea>
             </div>
-            
+
             <div class="row mb-3 rating-container" style="display: none;">
                 <div class="col-6">
                     <label class="form-label">Min Value</label>
@@ -490,12 +491,12 @@ $responseCount = $db->count('survey_responses', 'survey_id = ?', [$surveyId]);
                     <input type="number" class="form-control" name="questions[0][max_value]" value="5">
                 </div>
             </div>
-            
+
             <div class="mb-3 placeholder-container">
                 <label class="form-label">Placeholder Text</label>
                 <input type="text" class="form-control" name="questions[0][placeholder]">
             </div>
-            
+
             <div class="form-check">
                 <input class="form-check-input question-required" type="checkbox" name="questions[0][required]" checked>
                 <label class="form-check-label">Required</label>
@@ -617,5 +618,4 @@ document.getElementById('addQuestion')?.addEventListener('click', function() {
 </script>
 SCRIPT;
 
-require_once '../../includes/footer.php'; 
-?>
+require_once '../../includes/footer.php';
