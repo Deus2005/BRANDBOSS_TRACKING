@@ -26,19 +26,19 @@ if (in_array($role, ['super_admin', 'user_1'])) {
         'overdue_inspections' => $db->count('inspection_schedules', "status = 'pending' AND scheduled_date <= CURDATE()"),
         'open_tickets' => $db->count('maintenance_tickets', "status IN ('open', 'assigned', 'in_progress')")
     ];
-    
+
     // Recent activities
     $recentActivities = $db->fetchAll(
-        "SELECT al.*, u.full_name 
+        "SELECT al.*, CONCAT(u.first_name, ' ', last_name) as full_name 
          FROM activity_logs al 
          JOIN users u ON al.user_id = u.id 
          ORDER BY al.created_at DESC 
          LIMIT 10"
     );
-    
+
     // Recent installations
     $recentInstallations = $db->fetchAll(
-        "SELECT ir.*, u.full_name as installer_name, ia.area_name
+        "SELECT ir.*, CONCAT(u.first_name, ' ', last_name) as installer_name, ia.area_name
          FROM installation_reports ir
          JOIN users u ON ir.installer_id = u.id
          JOIN assignments a ON ir.assignment_id = a.id
@@ -46,7 +46,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
          ORDER BY ir.created_at DESC
          LIMIT 5"
     );
-    
+
 } elseif ($role === 'user_2') {
     // Installer statistics
     $stats = [
@@ -55,7 +55,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
         'my_completed' => $db->count('assignments', "assigned_to = ? AND status = 'completed'", [$userId]),
         'my_installations' => $db->count('installation_reports', "installer_id = ?", [$userId])
     ];
-    
+
     // My assignments
     $myAssignments = $db->fetchAll(
         "SELECT a.*, ia.area_name, ia.city,
@@ -67,7 +67,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
          LIMIT 10",
         [$userId]
     );
-    
+
 } elseif ($role === 'user_3') {
     // Inspector statistics
     $stats = [
@@ -76,7 +76,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
         'completed_inspections' => $db->count('inspection_reports', "inspector_id = ?", [$userId]),
         'escalated_issues' => $db->count('maintenance_tickets', "created_by = ?", [$userId])
     ];
-    
+
     // Due inspections
     $dueInspections = $db->fetchAll(
         "SELECT isc.*, ir.report_code, ia.area_name, ia.city
@@ -90,7 +90,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
          LIMIT 10",
         [$userId]
     );
-    
+
 } elseif ($role === 'user_4') {
     // Maintenance statistics
     $stats = [
@@ -99,7 +99,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
         'pending_requests' => $db->count('maintenance_item_requests', "requested_by = ? AND status = 'pending'", [$userId]),
         'completed_tickets' => $db->count('maintenance_tickets', "assigned_to = ? AND status = 'completed'", [$userId])
     ];
-    
+
     // My tickets
     $myTickets = $db->fetchAll(
         "SELECT mt.*, ir.report_code, ia.area_name
@@ -136,7 +136,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-6 col-lg-3">
         <div class="card stats-card" style="border-left-color: #198754;">
             <div class="card-body">
@@ -150,7 +150,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-6 col-lg-3">
         <div class="card stats-card" style="border-left-color: #0d6efd;">
             <div class="card-body">
@@ -164,7 +164,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-6 col-lg-3">
         <div class="card stats-card" style="border-left-color: #ffc107;">
             <div class="card-body">
@@ -178,7 +178,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-        
+
     <?php elseif ($role === 'user_2'): ?>
     <!-- Installer Stats -->
     <div class="col-6 col-lg-3">
@@ -194,7 +194,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-6 col-lg-3">
         <div class="card stats-card" style="border-left-color: #0d6efd;">
             <div class="card-body">
@@ -208,7 +208,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-6 col-lg-3">
         <div class="card stats-card" style="border-left-color: #198754;">
             <div class="card-body">
@@ -222,7 +222,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-6 col-lg-3">
         <div class="card stats-card">
             <div class="card-body">
@@ -236,7 +236,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <?php elseif ($role === 'user_3'): ?>
     <!-- Inspector Stats -->
     <div class="col-6 col-lg-3">
@@ -252,7 +252,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-6 col-lg-3">
         <div class="card stats-card" style="border-left-color: #dc3545;">
             <div class="card-body">
@@ -266,7 +266,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-6 col-lg-3">
         <div class="card stats-card" style="border-left-color: #198754;">
             <div class="card-body">
@@ -280,7 +280,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-6 col-lg-3">
         <div class="card stats-card">
             <div class="card-body">
@@ -294,7 +294,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <?php elseif ($role === 'user_4'): ?>
     <!-- Maintenance Stats -->
     <div class="col-6 col-lg-3">
@@ -310,7 +310,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-6 col-lg-3">
         <div class="card stats-card" style="border-left-color: #ffc107;">
             <div class="card-body">
@@ -324,7 +324,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-6 col-lg-3">
         <div class="card stats-card">
             <div class="card-body">
@@ -338,7 +338,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-6 col-lg-3">
         <div class="card stats-card" style="border-left-color: #198754;">
             <div class="card-body">
@@ -360,7 +360,7 @@ if (in_array($role, ['super_admin', 'user_1'])) {
     <!-- Manager View -->
     <div class="col-lg-8 mb-4">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-dark text-white">
                 <i class="bi bi-camera me-2"></i>Recent Installations
                 <a href="<?php echo APP_URL; ?>/modules/installations/index.php" class="btn btn-sm btn-outline-primary ms-auto">View All</a>
             </div>
@@ -396,10 +396,11 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <div class="col-lg-4 mb-4">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-dark text-white">
+                <span class="d-flex align-text-center">
                 <i class="bi bi-activity me-2"></i>Recent Activity
             </div>
             <div class="card-body">
@@ -421,12 +422,12 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <?php elseif ($role === 'user_2'): ?>
     <!-- Installer View -->
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-dark text-white">
                 <i class="bi bi-clipboard-check me-2"></i>My Assignments
                 <a href="<?php echo APP_URL; ?>/modules/assignments/index.php" class="btn btn-sm btn-outline-primary ms-auto">View All</a>
             </div>
@@ -479,12 +480,12 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <?php elseif ($role === 'user_3'): ?>
     <!-- Inspector View -->
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-dark text-white">
                 <i class="bi bi-search me-2"></i>Due Inspections
                 <a href="<?php echo APP_URL; ?>/modules/inspections/index.php" class="btn btn-sm btn-outline-primary ms-auto">View All</a>
             </div>
@@ -537,12 +538,12 @@ if (in_array($role, ['super_admin', 'user_1'])) {
             </div>
         </div>
     </div>
-    
+
     <?php elseif ($role === 'user_4'): ?>
     <!-- Maintenance View -->
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-dark text-white">
                 <i class="bi bi-wrench me-2"></i>My Tickets
                 <a href="<?php echo APP_URL; ?>/modules/maintenance/index.php" class="btn btn-sm btn-outline-primary ms-auto">View All</a>
             </div>
