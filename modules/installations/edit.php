@@ -3,10 +3,10 @@
  * Create Installation Report
  * User 2 submits installation with before/after photos and GPS
  */
-$pageTitle = 'Submit Installation Report';
-$breadcrumbs = [
-    ['title' => 'Installations', 'url' => 'index.php'],
-    ['title' => 'New Report']
+$pageTitle = 'Edit Installation Report';
+$breadcrumbs = [ 
+    ['title' => 'Installations', 'url' => 'index.php'], 
+    ['title' => 'Edit Report']
 ];
 
 require_once '../../includes/header.php';
@@ -17,40 +17,62 @@ $db = Database::getInstance();
 $userId = $auth->userId();
 $errors = [];
 
-// Get assignment ID from query or form
-$assignmentId = intval($_GET['assignment_id'] ?? $_POST['assignment_id'] ?? 0);
+// Get report ID from query or form
+$reportId = intval($_GET['id'] ?? $_POST['report_id'] ?? 0);
 
-// Get user's pending/in-progress assignments
-$myAssignments = $db->fetchAll(
-    "SELECT a.*, ia.area_name, ia.city, ia.address
-     FROM assignments a
-     JOIN installation_areas ia ON a.area_id = ia.id
-     WHERE a.assigned_to = ? AND a.status IN ('pending', 'in_progress')
-     ORDER BY a.due_date ASC",
+// Get user's rejected reports for edit selection
+$myReports = $db->fetchAll(
+    "SELECT a.*
+     FROM installation_reports a
+     WHERE a.installer_id = ? AND a.status = 'rejected'
+     ORDER BY a.created_at DESC",
     [$userId]
 );
 
-// If assignment selected, get its items
+// If report selected, get its details
 $assignmentItems = [];
+$selectedReport = null;
 $selectedAssignment = null;
+$reportItemData = [];
 
-if ($assignmentId) {
-    $selectedAssignment = $db->fetch(
-        "SELECT a.*, ia.area_name, ia.city, ia.address, ia.latitude, ia.longitude
-         FROM assignments a
+if ($reportId) {
+    $selectedReport = $db->fetch(
+        "SELECT ir.*, a.id AS assignment_id, a.assignment_code, ia.address AS address,
+                ia.area_name, ia.city, ia.province,
+                sd.*, addr.*
+         FROM installation_reports ir
+         JOIN assignments a ON ir.assignment_id = a.id
          JOIN installation_areas ia ON a.area_id = ia.id
-         WHERE a.id = ? AND a.assigned_to = ? AND a.status IN ('pending', 'in_progress')",
-        [$assignmentId, $userId]
+         LEFT JOIN installation_store_details sd ON ir.id = sd.report_id
+         LEFT JOIN installation_detailed_addresses addr ON ir.id = addr.report_id
+         WHERE ir.id = ? AND ir.installer_id = ? AND ir.status = 'rejected'",
+        [$reportId, $userId]
     );
     
-    if ($selectedAssignment) {
+    if ($selectedReport) {
+        $selectedAssignment = $selectedReport;
+
         $assignmentItems = $db->fetchAll(
             "SELECT ai.*, i.item_code, i.item_name, i.unit
              FROM assignment_items ai
              JOIN inventory_items i ON ai.item_id = i.id
-             WHERE ai.assignment_id = ? AND ai.status != 'completed'",
-            [$assignmentId]
+             WHERE ai.assignment_id = ?
+             ORDER BY ai.id ASC",
+            [$selectedReport['assignment_id']]
         );
+
+        $existingReportItems = $db->fetchAll(
+            "SELECT iri.*, ai.quantity_assigned, i.item_code, i.item_name, i.unit
+             FROM installation_report_items iri
+             JOIN assignment_items ai ON iri.assignment_item_id = ai.id
+             JOIN inventory_items i ON ai.item_id = i.id
+             WHERE iri.report_id = ?",
+            [$reportId]
+        );
+
+        foreach ($existingReportItems as $item) {
+            $reportItemData[$item['assignment_item_id']] = $item;
+        }
     }
 }
 
@@ -58,7 +80,49 @@ $location = null;
 $municipalityId = null;
 $barangays = [];
 
-if ($selectedAssignment) {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $selectedReport) {
+    $_POST['latitude'] = $selectedReport['latitude'] ?? '';
+    $_POST['longitude'] = $selectedReport['longitude'] ?? '';
+    $_POST['mnl_latitude'] = $selectedReport['mnl_latitude'] ?? '';
+    $_POST['mnl_longitude'] = $selectedReport['mnl_longitude'] ?? '';
+    $_POST['installation_date'] = $selectedReport['installation_date'] ?? '';
+    $_POST['overall_remarks'] = $selectedReport['overall_remarks'] ?? '';
+    $_POST['agency_store_code'] = $selectedReport['agency_store_code'] ?? '';
+    $_POST['date_of_visit'] = $selectedReport['date_of_visit'] ?? '';
+    $_POST['store_status'] = $selectedReport['store_status'] ?? '';
+    $_POST['reschedule_date'] = $selectedReport['reschedule_date'] ?? '';
+    $_POST['status_remarks'] = $selectedReport['status_remarks'] ?? '';
+    $_POST['store_name_before'] = $selectedReport['store_name_before'] ?? '';
+    $_POST['store_name_after'] = $selectedReport['store_name_after'] ?? '';
+    $_POST['owner_name'] = $selectedReport['owner_name'] ?? '';
+    $_POST['contact_number'] = $selectedReport['contact_number'] ?? '';
+    $_POST['area_length'] = $selectedReport['area_length'] ?? '';
+    $_POST['area_width'] = $selectedReport['area_width'] ?? '';
+    $_POST['additional_area_sqm'] = $selectedReport['additional_area_sqm'] ?? '';
+    $_POST['house_no'] = $selectedReport['house_no'] ?? '';
+    $_POST['block'] = $selectedReport['block'] ?? '';
+    $_POST['lot'] = $selectedReport['lot'] ?? '';
+    $_POST['street_name'] = $selectedReport['street_name'] ?? '';
+    $_POST['purok'] = $selectedReport['purok'] ?? '';
+    $_POST['sitio'] = $selectedReport['sitio'] ?? '';
+    $_POST['zone'] = $selectedReport['zone'] ?? '';
+    $_POST['phase'] = $selectedReport['phase'] ?? '';
+    $_POST['road'] = $selectedReport['road'] ?? '';
+    $_POST['barangay'] = $selectedReport['barangay'] ?? '';
+    $_POST['city'] = $selectedReport['city'] ?? '';
+    $_POST['province'] = $selectedReport['province'] ?? '';
+
+    if (!empty($reportItemData)) {
+        foreach ($reportItemData as $assignmentItemId => $item) {
+            $_POST['item_data'][$assignmentItemId] = [
+                'quantity' => $item['quantity_installed'],
+                'remarks' => $item['remarks'] ?? ''
+            ];
+        }
+    }
+}
+
+if ($selectedReport) {
 
     $municipality = $db->fetch(
         "SELECT b.municipality_id, b.municipality_name, c.province_name, d.region_name
@@ -66,7 +130,7 @@ if ($selectedAssignment) {
          JOIN table_province c ON b.province_id = c.province_id
          JOIN table_region d ON c.region_id = d.region_id
          WHERE LOWER(b.municipality_name) = LOWER(?)",
-        [trim($selectedAssignment['area_name'])]
+        [trim($selectedReport['area_name'])]
     );
 
     if ($municipality) {
@@ -93,7 +157,8 @@ function old($key) {
 }
 
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedReport) {
+    $assignmentId = $selectedReport['assignment_id'];
     $isEdit = isset($_POST['report_id']) && intval($_POST['report_id']) > 0;
     $editReportId = $isEdit ? intval($_POST['report_id']) : 0;
     
@@ -193,38 +258,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
             break;
         }
     }
-    
-    // Load existing data if editing
-    $existingStoreDetails = null;
-    $existingAddress = null;
-    $existingReportItems = [];
-    $existingOverallPhotos = [];
-    $reportCode = $db->fetch("SELECT installation_reports.report_code FROM installation_reports WHERE id = ?", [$editReportId])['report_code'] ?? null;
-
-    if ($existingReport) {
-        $existingStoreDetails = $db->fetch("SELECT * FROM installation_store_details WHERE report_code = ?", [$editReportId]);
-        $existingAddress = $db->fetch("SELECT * FROM installation_detailed_addresses WHERE report_code = ?", [$editReportId]);
-        $existingReportItems = $db->fetchAll(
-            "SELECT iri.*, ai.item_id, i.item_code, i.item_name, i.unit
-            FROM installation_report_items iri
-            JOIN assignment_items ai ON iri.assignment_item_id = ai.id
-            JOIN inventory_items i ON ai.item_id = i.id
-            WHERE iri.report_id = ?",
-            [$editReportId]
-        );
-        $existingOverallPhotos = $db->fetchAll(
-            "SELECT * FROM installation_report_photos WHERE report_id = ? ORDER BY photo_type, display_order",
-            [$editReportId]
-        );
-    }
 
     if ($errors === []) {
         try {
             $db->beginTransaction();
             
-            if($isEdit) {
-                // Update existing report
+            if ($isEdit) {
                 $reportId = $editReportId;
+                $reportCode = $db->fetch("SELECT report_code FROM installation_reports WHERE id = ?", [$reportId])['report_code'] ?? null;
+
                 $updateResult = $db->update('installation_reports', [
                     'installation_date' => $installationDate,
                     'latitude' => $latitude,
@@ -235,35 +277,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                     'overall_remarks' => $overallRemarks,
                     'status' => 'submitted',
                     'reviewed_by' => null,
-                    'reviewed_at' => null
+                    'reviewed_at' => null,
+                    'Permission' => null
                 ], 'id = ?', [$reportId]);
 
                 if (!$updateResult) {
                     throw new Exception('Failed to update installation report');
                 }
 
-                // Delete existing store details and address
-                $db->delete('installation_store_details', 'report_id = ?', [$reportId]);
-                $db->delete('installation_detailed_addresses', 'report_id = ?', [$reportId]);
-                $db->delete('installation_report_photos', 'report_id = ?', [$reportId]);
-                $db->delete('installation_report_items', 'report_id = ?', [$reportId]);
-                $db->delete('installation_item_photos', 'report_item_id IN (SELECT id FROM installation_report_items WHERE report_id = ?)', [$reportId]);
-
-                // Reset assignment items quantities (reverse previous installation)
                 $oldItems = $db->fetchAll("SELECT assignment_item_id, quantity_installed FROM installation_report_items WHERE report_id = ?", [$reportId]);
                 foreach ($oldItems as $oldItem) {
                     $db->query(
                         "UPDATE assignment_items SET quantity_installed = quantity_installed - ? WHERE id = ?",
                         [$oldItem['quantity_installed'], $oldItem['assignment_item_id']]
                     );
+
                     $assignItem = $db->fetch("SELECT item_id FROM assignment_items WHERE id = ?", [$oldItem['assignment_item_id']]);
                     $db->query(
                         "UPDATE inventory_items SET quantity_reserved = quantity_reserved + ?, quantity_installed = quantity_installed - ? WHERE id = ?",
                         [$oldItem['quantity_installed'], $oldItem['quantity_installed'], $assignItem['item_id']]
                     );
                 }
+
+                $db->delete('installation_store_details', 'report_id = ?', [$reportId]);
+                $db->delete('installation_detailed_addresses', 'report_id = ?', [$reportId]);
+                $db->delete('installation_report_photos', 'report_id = ?', [$reportId]);
+                $db->delete('installation_report_items', 'report_id = ?', [$reportId]);
+                $db->delete('installation_item_photos', 'report_item_id IN (SELECT id FROM installation_report_items WHERE report_id = ?)', [$reportId]);
+                $db->delete('inspection_schedules', 'installation_report_id = ?', [$reportId]);
             } else {
-                // Create installation report
                 $reportCode = generateCode('INS-');
                 $reportId = $db->insert('installation_reports', [
                     'report_code' => $reportCode,
@@ -494,7 +536,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
             $auth->logActivity($userId, 'submitted_installation', 'installations', 'installation_reports', $reportId);
             
             $db->commit();
-            redirect('index.php', 'Installation report submitted successfully!', 'success');
+            redirect(
+                $isEdit ? "view.php?id={$reportId}" : 'index.php',
+                $isEdit ? 'Installation report updated successfully!' : 'Installation report submitted successfully!',
+                'success'
+            );
             
         } catch (Throwable $e) {
             try {
@@ -515,7 +561,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="page-title mb-0">
-        <i class="bi bi-camera me-2"></i>Submit Installation Report
+        <i class="bi bi-camera me-2"></i>Edit Installation Report
     </h1>
     <a href="index.php" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left"></i> Back
@@ -526,51 +572,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
 <div class="alert alert-danger"><?php echo $errors['general']; ?></div>
 <?php endif; ?>
 
-<?php if (empty($myAssignments)): ?>
-<div class="alert alert-info">
-    <i class="bi bi-info-circle me-2"></i>
-    You don't have any pending assignments. Please wait for an assignment to be made.
-</div>
-<?php elseif (!$selectedAssignment): ?>
-<!-- Assignment Selection -->
-<div class="card">
-    <div class="card-header bg-primary">
-        <i class="bi bi-clipboard-check me-2"></i>Select Assignment
-    </div>
-    <div class="card-body">
-        <p class="text-muted">Choose an assignment to submit installation report:</p>
-        <div class="row g-3">
-            <?php foreach ($myAssignments as $assign): ?>
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 border-2">
-                    <div class="card-body">
-                        <h5 class="card-title"><?php echo clean($assign['assignment_code']); ?></h5>
-                        <p class="mb-1"><i class="bi bi-geo-alt text-danger me-1"></i><?php echo clean($assign['area_name']); ?></p>
-                        <p class="text-muted small mb-2"><?php echo clean($assign['city']); ?></p>
-                        <p class="mb-1">
-                            <span class="badge bg-<?php echo strtotime($assign['due_date']) < time() ? 'danger' : 'info'; ?>">
-                                Due: <?php echo formatDate($assign['due_date']); ?>
-                            </span>
-                        </p>
-                        <?php echo priorityBadge($assign['priority']); ?>
-                    </div>
-                    <div class="card-footer bg-transparent">
-                        <a href="?assignment_id=<?php echo $assign['id']; ?>" class="btn btn-primary w-100">
-                            <i class="bi bi-arrow-right me-1"></i>Select
+<?php if (!$selectedReport): ?>
+    <?php if (!empty($myReports)): ?>
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Select a rejected installation report below to edit.
+        </div>
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <i class="bi bi-list-ul me-2"></i>Rejected Reports
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <?php foreach ($myReports as $report): ?>
+                        <a href="edit.php?id=<?php echo $report['id']; ?>" class="list-group-item list-group-item-action">
+                            <strong><?php echo clean($report['report_code']); ?></strong>
+                            <div class="small text-muted">
+                                <?php echo clean($report['status']); ?> 
+                                &middot; Assigned on <?php echo formatDate($report['created_at'] ?? $report['installation_date']); ?>
+                            </div>
                         </a>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
-            <?php endforeach; ?>
         </div>
-    </div>
-</div>
+    <?php else: ?>
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            You have no rejected installation reports available for editing.
+        </div>
+    <?php endif; ?>
 <?php else: ?>
 <!-- Installation Form -->
 <form method="POST" action="" enctype="multipart/form-data" id="installationForm">
-    <input type="hidden" name="assignment_id" value="<?php echo $assignmentId; ?>">
-    <input type="hidden" name="latitude" id="latitude" value="">
-    <input type="hidden" name="longitude" id="longitude" value="">
+    <input type="hidden" name="report_id" value="<?php echo $reportId; ?>">
+    <input type="hidden" name="latitude" id="latitude" value="<?php echo htmlspecialchars($_POST['latitude'] ?? ''); ?>">
+    <input type="hidden" name="longitude" id="longitude" value="<?php echo htmlspecialchars($_POST['longitude'] ?? ''); ?>">
     <div id="gps-error" class="alert alert-danger py-2" style="display: none;"></div>
     <div class="row">
         <!-- Assignment Info & GPS -->
@@ -645,7 +682,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                     <div class="mb-3">
                         <label for="installation_date" class="form-label">Installation Date</label>
                         <input type="date" class="form-control" id="installation_date" name="installation_date"
-                               value="<?php echo date('Y-m-d'); ?> <?= old('installation_date'); ?>" max="<?php echo date('Y-m-d'); ?>">
+                               value="<?= old('installation_date'); ?>" max="<?php echo date('Y-m-d'); ?>">
                     </div>
                     <div class="mb-0">
                         <label for="overall_remarks" class="form-label">Overall Remarks</label>
@@ -676,7 +713,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                         <div class="col-md-6 mb-3">
                             <label for="date_of_visit" class="form-label">Date of Visit <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" id="date_of_visit" name="date_of_visit"
-                                   value="<?php echo date('Y-m-d'); ?>" max="<?php echo date('Y-m-d'); ?>" required>
+                                   value="<?= old('date_of_visit'); ?>" max="<?php echo date('Y-m-d'); ?>" required>
                         </div>
                     </div>
 
@@ -960,18 +997,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                                  data-bs-parent="#itemsAccordion">
                                 <div class="accordion-body">
                                     <div class="row">
-                                        <div class="col-md-4 mb-3">
+                                        <?php $existingItem = $reportItemData[$item['id']] ?? null; ?>
+                        <div class="col-md-4 mb-3">
                                             <label class="form-label">Quantity Installed <span class="text-danger">*</span></label>
                                             <input type="number" class="form-control" 
                                                    name="item_data[<?php echo $item['id']; ?>][quantity]"
-                                                   min="1" max="<?php echo $item['quantity_assigned'] - $item['quantity_installed']; ?>"
-                                                   value="<?php echo $item['quantity_assigned'] - $item['quantity_installed']; ?>" required>
-                                            <small class="text-muted">Max: <?php echo $item['quantity_assigned'] - $item['quantity_installed']; ?> <?php echo $item['unit']; ?></small>
+                                                   min="1" max="<?php echo $item['quantity_assigned']; ?>"
+                                                   value="<?php echo htmlspecialchars(isset($_POST['item_data'][$item['id']]['quantity']) ? $_POST['item_data'][$item['id']]['quantity'] : ($existingItem['quantity_installed'] ?? ($item['quantity_assigned'] - $item['quantity_installed']))); ?>" required>
+                                            <small class="text-muted">Max: <?php echo $item['quantity_assigned']; ?> <?php echo $item['unit']; ?></small>
                                         </div>
                                         <div class="col-md-8 mb-3">
                                             <label class="form-label">Remarks</label>
                                             <input type="text" class="form-control" 
                                                    name="item_data[<?php echo $item['id']; ?>][remarks]"
+                                                   value="<?php echo htmlspecialchars(isset($_POST['item_data'][$item['id']]['remarks']) ? $_POST['item_data'][$item['id']]['remarks'] : ($existingItem['remarks'] ?? '')); ?>"
                                                    placeholder="Optional notes for this item">
                                         </div>
                                         <!-- Item Before Photos (Multiple) -->
@@ -1019,11 +1058,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                     </div>
                     
                     <div class="mt-4 d-flex justify-content-between">
-                        <a href="?assignment_id=" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i>Change Assignment
+                        <a href="index.php" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Installations
                         </a>
                         <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
-                            <i class="bi bi-check-lg me-1"></i>Submit Report
+                            <i class="bi bi-check-lg me-1"></i>Update Report
                         </button>
                     </div>
                     <?php endif; ?>
@@ -1032,7 +1071,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
         </div>
     </div>
 </form>
-
+<?php endif; ?>
 <?php
 $extraScripts = <<<'SCRIPT'
 <script>
@@ -1398,6 +1437,5 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 SCRIPT;
 ?>
-<?php endif; ?>
 
 <?php require_once '../../includes/footer.php'; ?>

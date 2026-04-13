@@ -25,7 +25,7 @@ $dateTo = $_GET['date_to'] ?? '';
 $page = max(1, intval($_GET['page'] ?? 1));
 
 // Build query
-$where = ['1=1'];
+$where = ['1=1']; 
 $params = [];
 
 // User 2 can only see their own installations
@@ -101,7 +101,7 @@ $areas = $db->fetchAll("SELECT id, area_name FROM installation_areas WHERE statu
         <form method="GET" class="row g-3">
             <?php if ($currentRole !== 'user_2'): ?>
             <div class="col-md-2">
-                <select name="installer" class="form-select">
+                <select name="installer"     class="form-select">
                     <option value="">All Installers</option>
                     <?php foreach ($installers as $inst): ?>
                     <option value="<?php echo $inst['id']; ?>" <?php echo $installer == $inst['id'] ? 'selected' : ''; ?>>
@@ -208,6 +208,21 @@ $areas = $db->fetchAll("SELECT id, area_name FROM installation_areas WHERE statu
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </a>
                                         <div class="action-dropdown">
+                                                <?php if($inst['Permission'] === 'Permitted'): ?>
+                                                    <div class="edit-container">
+                                                        <a href="edit.php?id=<?php echo $inst['id']; ?>" class="btn-view" 
+                                                            title="edit">
+                                                            <div class="block-container">
+                                                                <div class="edit icon">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </div>
+                                                                <div class="edit text">
+                                                                    Edit
+                                                                </div>                                                 
+                                                            </div>
+                                                        </a>
+                                                    </div>
+                                                <?php endif; ?>
                                             <div class="view-container">
                                                 <a href="view.php?id=<?php echo $inst['id']; ?>" class="btn-view" 
                                                     title="View">
