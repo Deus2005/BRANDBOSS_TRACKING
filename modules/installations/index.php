@@ -82,6 +82,8 @@ $installers = $db->fetchAll("SELECT id, full_name FROM users WHERE role = 'user_
 
 // Get areas for filter
 $areas = $db->fetchAll("SELECT id, area_name FROM installation_areas WHERE status = 'active' ORDER BY area_name");
+
+$reports = $db->fetch("SELECT * FROM installation_reports WHERE id = ?", [$installations['id']]);
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -249,21 +251,22 @@ $areas = $db->fetchAll("SELECT id, area_name FROM installation_areas WHERE statu
                                                     </div>
                                                 </a>    
                                             </div>
-                                                <?php if (in_array($currentRole, ['super_admin', 'user_1']) && $inst['status'] === 'submitted'): ?>                                    
-                                                    <div class="delete">
-                                                        <a href="#" class="btn-review" 
+                                            <?php if (in_array($currentRole, ['super_admin', 'user_1']) && $inst['status'] === 'rejected' && $inst['Permission'] === 'Not Permitted'): ?>        
+                                                    <div class="Permit-container">
+                                                        <a href="view.php?id=<?php echo $inst['id']; ?>" class="btn-review" 
+                                                            title="Permit Edit"
                                                             data-id="<?php echo $inst['id']; ?>"
-                                                            data-name="<?php echo clean($inst['category_name']); ?>">
+                                                            data-name="<?php echo clean($inst['report_code']); ?>">
                                                             <div class="block-container">
-                                                                <div class="review icon">
+                                                                <div class="permit icon">
                                                                     <i class="bi bi-check2-square"></i>
                                                                 </div>
-                                                                <div class="review text">
-                                                                    Review
+                                                                <div class="permit text">
+                                                                    Permit Edit
                                                                 </div>
                                                             </div>
                                                         </a>                                        
-                                                    </div>
+                                                    </div>                                                                       
                                             <?php endif; ?>
                                         </div>  
                                     </div>

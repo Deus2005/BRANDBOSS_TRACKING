@@ -30,6 +30,9 @@ $myAssignments = $db->fetchAll(
     [$userId]
 );
 
+// Get all store type
+$storeType = $db->fetchAll("SELECT * FROM installation_store_type ORDER BY name_type ASC");
+
 // If assignment selected, get its items
 $assignmentItems = [];
 $selectedAssignment = null;
@@ -94,20 +97,7 @@ function old($key) {
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
-    $isEdit = isset($_POST['report_id']) && intval($_POST['report_id']) > 0;
-    $editReportId = $isEdit ? intval($_POST['report_id']) : 0;
-    
-    // Verify edit permission
-    if ($isEdit) {
-        $editReport = $db->fetch(
-            "SELECT id FROM installation_reports WHERE id = ? AND installer_id = ? AND status = 'rejected'",
-            [$editReportId, $userId]
-        );
-        if (!$editReport) {
-            $errors['general'] = 'Invalid report for editing';
-        }
-    }
-
+    $StoreType = $_POST['store_type'] ?? '';
     $latitude = floatval($_POST['latitude'] ?? 0);
     $longitude = floatval($_POST['longitude'] ?? 0);
     $mnl_latitude = floatval($_POST['mnl_latitude'] ?? 0);
@@ -162,6 +152,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
     if (empty($storeData['store_status'])) {
         $errors['store'] = 'Store status is required';
     }
+    
+    if (empty($StoreType)) {
+        $errors['store'] = 'Store type is required';
+    }
 
     if (empty($storeData['owner_name'])) {
         $errors['store'] = 'Owner name is required';
@@ -193,96 +187,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
             break;
         }
     }
-    
-    // Load existing data if editing
-    $existingStoreDetails = null;
-    $existingAddress = null;
-    $existingReportItems = [];
-    $existingOverallPhotos = [];
-    $reportCode = $db->fetch("SELECT installation_reports.report_code FROM installation_reports WHERE id = ?", [$editReportId])['report_code'] ?? null;
-
-    if ($existingReport) {
-        $existingStoreDetails = $db->fetch("SELECT * FROM installation_store_details WHERE report_code = ?", [$editReportId]);
-        $existingAddress = $db->fetch("SELECT * FROM installation_detailed_addresses WHERE report_code = ?", [$editReportId]);
-        $existingReportItems = $db->fetchAll(
-            "SELECT iri.*, ai.item_id, i.item_code, i.item_name, i.unit
-            FROM installation_report_items iri
-            JOIN assignment_items ai ON iri.assignment_item_id = ai.id
-            JOIN inventory_items i ON ai.item_id = i.id
-            WHERE iri.report_id = ?",
-            [$editReportId]
-        );
-        $existingOverallPhotos = $db->fetchAll(
-            "SELECT * FROM installation_report_photos WHERE report_id = ? ORDER BY photo_type, display_order",
-            [$editReportId]
-        );
-    }
 
     if ($errors === []) {
         try {
             $db->beginTransaction();
-            
-            if($isEdit) {
-                // Update existing report
-                $reportId = $editReportId;
-                $updateResult = $db->update('installation_reports', [
-                    'installation_date' => $installationDate,
-                    'latitude' => $latitude,
-                    'longitude' => $longitude,
-                    'mnl_latitude' => $mnl_latitude,
-                    'mnl_longitude' => $mnl_longitude,
-                    'location_address' => $selectedAssignment['address'],
-                    'overall_remarks' => $overallRemarks,
-                    'status' => 'submitted',
-                    'reviewed_by' => null,
-                    'reviewed_at' => null
-                ], 'id = ?', [$reportId]);
-
-                if (!$updateResult) {
-                    throw new Exception('Failed to update installation report');
-                }
-
-                // Delete existing store details and address
-                $db->delete('installation_store_details', 'report_id = ?', [$reportId]);
-                $db->delete('installation_detailed_addresses', 'report_id = ?', [$reportId]);
-                $db->delete('installation_report_photos', 'report_id = ?', [$reportId]);
-                $db->delete('installation_report_items', 'report_id = ?', [$reportId]);
-                $db->delete('installation_item_photos', 'report_item_id IN (SELECT id FROM installation_report_items WHERE report_id = ?)', [$reportId]);
-
-                // Reset assignment items quantities (reverse previous installation)
-                $oldItems = $db->fetchAll("SELECT assignment_item_id, quantity_installed FROM installation_report_items WHERE report_id = ?", [$reportId]);
-                foreach ($oldItems as $oldItem) {
-                    $db->query(
-                        "UPDATE assignment_items SET quantity_installed = quantity_installed - ? WHERE id = ?",
-                        [$oldItem['quantity_installed'], $oldItem['assignment_item_id']]
-                    );
-                    $assignItem = $db->fetch("SELECT item_id FROM assignment_items WHERE id = ?", [$oldItem['assignment_item_id']]);
-                    $db->query(
-                        "UPDATE inventory_items SET quantity_reserved = quantity_reserved + ?, quantity_installed = quantity_installed - ? WHERE id = ?",
-                        [$oldItem['quantity_installed'], $oldItem['quantity_installed'], $assignItem['item_id']]
-                    );
-                }
-            } else {
-                // Create installation report
-                $reportCode = generateCode('INS-');
-                $reportId = $db->insert('installation_reports', [
-                    'report_code' => $reportCode,
-                    'assignment_id' => $assignmentId,
-                    'installer_id' => $userId,
-                    'installation_date' => $installationDate,
-                    'latitude' => $latitude,
-                    'longitude' => $longitude,
-                    'mnl_latitude' => $mnl_latitude,
-                    'mnl_longitude' => $mnl_longitude,
-                    'location_address' => $selectedAssignment['address'],
-                    'overall_remarks' => $overallRemarks,
-                    'status' => 'submitted'
-                ]);
-
-                if (!$reportId) {
-                    throw new Exception('Failed to insert installation report');
-                }
-            }
+            // Create installation report
+            $reportCode = generateCode('INS-');
+            $reportId = $db->insert('installation_reports', [
+                'report_code' => $reportCode,
+                'assignment_id' => $assignmentId,
+                'installer_id' => $userId,
+                'store_type' => $StoreType,
+                'installation_date' => $installationDate,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'mnl_latitude' => $mnl_latitude,
+                'mnl_longitude' => $mnl_longitude,
+                'location_address' => $selectedAssignment['address'],
+                'overall_remarks' => $overallRemarks,
+                'status' => 'submitted'
+            ]);
 
             // Insert store details
             $storeData['report_id'] = $reportId;
@@ -681,7 +605,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                     </div>
 
                     <div class="row">
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="store_type" class="form-label">Store Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="store_type" name="store_type" required>
+                                <option value="">-- Select Type --</option>
+                                <?php foreach ($storeType as $type): ?>
+                                    <option value="<?= $type['name_type'] ?>" <?= old('store_type') == $type['name_type'] ? 'selected' : '' ?>>
+                                        <?= $type['name_type'] ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
                             <label for="store_status" class="form-label">Store Status Upon Visit <span class="text-danger">*</span></label>
                             <select class="form-select" id="store_status" name="store_status" required>
                                 <option value="">-- Select Status --</option>

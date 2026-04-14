@@ -137,6 +137,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
     $permission = null;
     $message = null;
 
+    if ($action === 'permit_edit') {
+        $db->update('installation_reports', [
+            'Permission' => 'Permitted',
+            'reviewed_by' => $userId,
+            'reviewed_at' => date('Y-m-d H:i:s')
+        ], 'id = ?', [$installationId]);
+
+        createNotification(
+            $installation['installer_id'],
+            'Edit Permission Granted',
+            "Your installation report {$installation['report_code']} has been allowed to be edited.",
+            'info',
+            APP_URL . "/modules/installations/view.php?id={$installationId}"
+        );
+
+        $auth->logActivity($userId, 'permit_edit_installation', 'installations', 'installation_reports', $installationId);
+        redirect("view.php?id={$installationId}", 'Edit permission granted.', 'success');
+    }
+
     if (in_array($action, ['approve', 'reject'])) {
         $newStatus = $action === 'approve' ? 'approved' : 'rejected';
         
@@ -175,9 +194,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         <i class="bi bi-camera me-2"></i>Installation Report
     </h1>
     <div>
-        <a href="map.php?id=<?php echo $installationId; ?>" class="btn btn-outline-success me-2">
-            <i class="bi bi-geo-alt"></i> View Map
-        </a>
         <a href="index.php" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back
         </a>
@@ -352,6 +368,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
                         <td class="text-muted">Owner:</td>
                         <td><strong><?php echo clean($installation['owner_name']); ?></strong></td>
                     </tr>
+                     <tr>
+                        <td class="text-muted">Store Type:</td>
+                        <td><strong><?php echo clean($installation['store_type']); ?></strong></td>
+                    </tr>
                     <tr>
                         <td class="text-muted">Contact:</td>
                         <td><a href="tel:<?php echo str_replace('-', '', $installation['contact_number']); ?>"><?php echo clean($installation['contact_number']); ?></a></td>
@@ -473,6 +493,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
                             Confirm Reject
                         </button>
                     </div>
+                </form>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if (in_array($currentRole, ['super_admin', 'user_1']) && $installation['status'] === 'rejected' && $installation['Permission'] === 'Not Permitted'): ?>
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <i class="bi bi-check2-square me-2"></i>Permit Edit
+            </div>
+            <div class="card-body">
+                <p class="mb-3">This report was rejected and currently cannot be edited. Grant edit permission so the installer can update the rejected report.</p>
+                <form method="POST">
+                    <input type="hidden" name="action" value="permit_edit">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check2-square me-1"></i> Allow Edit
+                    </button>
                 </form>
             </div>
         </div>

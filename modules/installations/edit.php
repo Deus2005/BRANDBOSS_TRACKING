@@ -29,6 +29,8 @@ $myReports = $db->fetchAll(
     [$userId]
 );
 
+$storeType = $db->fetchAll("SELECT * FROM installation_store_type ORDER BY name_type ASC");
+
 // If report selected, get its details
 $assignmentItems = [];
 $selectedReport = null;
@@ -85,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $selectedReport) {
     $_POST['longitude'] = $selectedReport['longitude'] ?? '';
     $_POST['mnl_latitude'] = $selectedReport['mnl_latitude'] ?? '';
     $_POST['mnl_longitude'] = $selectedReport['mnl_longitude'] ?? '';
+    $_POST['store_type'] = $selectedReport['store_type'] ?? '';
     $_POST['installation_date'] = $selectedReport['installation_date'] ?? '';
     $_POST['overall_remarks'] = $selectedReport['overall_remarks'] ?? '';
     $_POST['agency_store_code'] = $selectedReport['agency_store_code'] ?? '';
@@ -173,6 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedReport) {
         }
     }
 
+    $StoreType = $_POST['store_type'] ?? '';
     $latitude = floatval($_POST['latitude'] ?? 0);
     $longitude = floatval($_POST['longitude'] ?? 0);
     $mnl_latitude = floatval($_POST['mnl_latitude'] ?? 0);
@@ -273,6 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedReport) {
                     'longitude' => $longitude,
                     'mnl_latitude' => $mnl_latitude,
                     'mnl_longitude' => $mnl_longitude,
+                    'store_type' => $StoreType,
                     'location_address' => $selectedAssignment['address'],
                     'overall_remarks' => $overallRemarks,
                     'status' => 'submitted',
@@ -718,7 +723,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedReport) {
                     </div>
 
                     <div class="row">
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="store_type" class="form-label">Store Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="store_type" name="store_type" required>
+                                <option value="">-- Select Type --</option>
+                                <?php foreach ($storeType as $type): ?>
+                                    <option value="<?= $type['name_type'] ?>" <?= old('store_type') == $type['name_type'] ? 'selected' : '' ?>>
+                                        <?= $type['name_type'] ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
                             <label for="store_status" class="form-label">Store Status Upon Visit <span class="text-danger">*</span></label>
                             <select class="form-select" id="store_status" name="store_status" required>
                                 <option value="">-- Select Status --</option>
