@@ -1,7 +1,7 @@
 <?php
 require_once 'config/config.php';
 require_once 'classes/Database.php';
-require_once 'includes/helpers.php';
+require_once 'includes/helpers.php'; 
 
 $db = Database::getInstance();
 
@@ -300,40 +300,40 @@ foreach ($cityBreakdownRows as $row) {
                     <div class="client-area-legend">
                         <div class="client-legend-item">
                             <span class="client-legend-swatch client-legend-completed"></span>
-                            Completed
+                            Completed   
                         </div>
                         <div class="client-legend-item">
-                            <span class="client-legend-swatch client-legend-pending"></span>
-                            Pending
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
+                            <span class="client-legend-swatch client-legend-pending"></span>  
+                            Pending    
+                        </div>   
+                    </div>     
+                </div> 
+            </section>      
+        </div>    
+            
         <div id="areaProgressSection" class="client-tab-section" aria-label="Area progress content">
-            <div class="client-area-progress-full">
-                <div class="client-area-table-card">
-                    <div class="client-area-table-header">
+            <div class="client-area-progress-full">   
+                <div class="client-area-table-card">   
+                    <div class="client-area-table-header">   
                         <div class="client-area-table-title">Detailed Area Breakdown</div>
-
-                        <div class="client-area-search">
+                                  
+                        <div class="client-area-search">        
                             <i class="bi bi-search client-area-search-icon"></i>
-                            <input
-                                id="citySearch"
-                                class="client-area-search-input"
-                                type="text"
-                                placeholder="Search Area"
-                                autocomplete="off"
-                            >
-                        </div>
-                    </div>
+                            <input          
+                                id="citySearch" 
+                                class="client-area-search-input"         
+                                type="text"         
+                                placeholder="Search Area"           
+                                autocomplete="off"              
+                            >                   
+                        </div>                          
+                    </div>              
 
-                    <div class="client-area-table-wrapper">
-                        <table class="client-area-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-area">Area</th>
+                    <div class="client-area-table-wrapper">         
+                        <table class="client-area-table">           
+                            <thead>             
+                                <tr>                                                        
+                                    <th class="col-area">Area</th>  
                                     <th class="col-total">Total</th>
                                     <th class="col-completed">Completed</th>
                                     <th class="col-pending">Pending</th>
@@ -396,7 +396,8 @@ foreach ($cityBreakdownRows as $row) {
                             var tbody = document.getElementById('cityTableBody');
                             if (!tbody) return;
 
-                            var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+                            var rows = Array.pro
+                            totype.slice.call(tbody.querySelectorAll('tr'));
                             var search = document.getElementById('citySearch');
                             var pageInfo = document.getElementById('areaPageInfo');
                             var prevBtn = document.getElementById('areaPrevBtn');
@@ -404,11 +405,12 @@ foreach ($cityBreakdownRows as $row) {
 
                             var currentPage = 1;
 
+
                             function setDisabled(btn, disabled) {
                                 if (!btn) return;
                                 btn.disabled = !!disabled;
                             }
-
+ 
                             function render() {
                                 var term = (search && search.value ? search.value : '').toLowerCase().trim();
 

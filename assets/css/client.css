@@ -52,7 +52,7 @@
     width: 30px;
     height: 30px;
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.14);
+    border: 1px solid rgb(255, 255, 255);
     background:  rgba(255,255,255,0.06);
     color: #fff;
     display: inline-flex;
@@ -100,7 +100,6 @@
     justify-content: space-between;
     gap: 10px;
 }
-
 .client-card-label{
     font-size: 12px;
     font-weight: 700;
