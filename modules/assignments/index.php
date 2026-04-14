@@ -56,12 +56,14 @@ $sql = "SELECT a.*,
                u2.full_name as assigned_by_name,
                (SELECT COUNT(*) FROM assignment_items WHERE assignment_id = a.id) as item_count,
                (SELECT SUM(quantity_assigned) FROM assignment_items WHERE assignment_id = a.id) as total_items
-        FROM assignments a
-        JOIN installation_areas ia ON a.area_id = ia.id
-        JOIN users u1 ON a.assigned_to = u1.id
-        JOIN users u2 ON a.assigned_by = u2.id
-        WHERE {$whereClause}
-        ORDER BY a.created_at DESC";
+                FROM assignments a
+                JOIN installation_areas ia ON a.area_id = ia.id
+                JOIN users u1 ON a.assigned_to = u1.id
+                JOIN users u2 ON a.assigned_by = u2.id
+                WHERE {$whereClause}
+                ORDER BY CASE WHEN a.status != 'completed' AND a.status != 'cancelled' AND a.due_date < CURDATE() THEN 0 ELSE 1 END ASC,
+                 a.due_date ASC,
+                 a.created_at DESC";
 
 $result = $db->paginate($sql, $params, $page, ITEMS_PER_PAGE);
 $assignments = $result['data'];
@@ -182,15 +184,10 @@ $canCreate = in_array($currentRole, ['super_admin', 'user_1']);
                                 if ($assign['status'] !== 'completed' && strtotime($assign['due_date']) < time()) {
 
                                     $dueDate = strtotime($assign['due_date']);
-                                    $graceEnd = strtotime('+3 days', $dueDate);
-                                    $daysLeft = ceil(($graceEnd - time()) / (60 * 60 * 24));
 
-                                    if ($daysLeft > 0) {
-                                        echo ' <span class="badge bg-danger">Overdue</span>';
-                                        echo '<br><span style="font-size: 0.8em;color: #5d5d5d9d">closes in '.$daysLeft.' day'.($daysLeft > 1 ? 's' : '').'</span>';
-                                    } else {
-                                        echo ' <span class="badge bg-dark">Closed</span>';
-                                    }
+                                    if ($dueDate > 0) {
+                                        echo ' <span class="badge bg-danger">Overdue</span>';                                      
+                                    } 
                                 }
                             ?>
                         </td>
