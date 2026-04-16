@@ -229,7 +229,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-lg-4 mb-4">
             <div class="card mb-3">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-info-circle me-2"></i>Installation Details
+                    <span class= "d-flex align-text-center">
+                    <span class="bi bi-info-circle me-2"></span>Installation Details
+</span>
                 </div>
                 <div class="card-body">
                     <p class="mb-2"><strong>Code:</strong> <?php echo clean($schedule['report_code']); ?></p>
@@ -242,7 +244,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <div class="card mb-3">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-calendar me-2"></i>Inspection Info
+                    <span class= "d-flex align-text-center">
+                    <span class="bi bi-calendar me-2"></span>Inspection Info
+</span>
                 </div>
                 <div class="card-body">
                     <div class="text-center mb-3">
@@ -276,7 +280,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <div class="card">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-geo-alt me-2"></i>GPS Location
+                    <span class = "d-flex align-text-center">
+                    <span class="bi bi-geo-alt me-2"></span>GPS Location
+</span>
                 </div>
                 <div class="card-body">
                     <div id="gps-status" class="text-center py-2">
@@ -297,7 +303,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-lg-8 mb-4">
             <div class="card">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-list-check me-2"></i>Inspect Items
+                    <span class= "d-flex align-text-center">
+                    <span class="bi bi-list-check me-2"></span>Inspect Items
+</span>
                 </div>
                 <div class="card-body">
                     <?php if (isset($errors['items'])): ?>
