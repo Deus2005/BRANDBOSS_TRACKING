@@ -36,6 +36,7 @@ define('UPLOAD_PATH', ROOT_PATH . 'uploads/');
 define('BEFORE_PHOTO_PATH', UPLOAD_PATH . 'before/');
 define('AFTER_PHOTO_PATH', UPLOAD_PATH . 'after/');
 define('MAINTENANCE_PHOTO_PATH', UPLOAD_PATH . 'maintenance/');
+define('STORE_PHOTO_PATH', UPLOAD_PATH . 'store_images/');
 
 // Upload Configuration
 define('MAX_UPLOAD_SIZE', 10 * 1024 * 1024); // 10MB

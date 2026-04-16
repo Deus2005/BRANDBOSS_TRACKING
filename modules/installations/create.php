@@ -181,9 +181,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
         // Check files - now supporting multiple photos
         $beforePhotosKey = 'item_before_' . $aiId;
         $afterPhotosKey = 'item_after_' . $aiId;
+        $storePhotosKey = 'item_store_photos_' . $aiId;
 
         if (empty($_FILES[$beforePhotosKey]['name'][0]) || empty($_FILES[$afterPhotosKey]['name'][0])) {
             $errors['photos'] = 'Before and after photos are required for all items';
+            break;
+        }
+
+        if (empty($_FILES[$storePhotosKey]['name'][0])) {
+            $errors['store_photos'] = 'Store photos are required for all items';
             break;
         }
     }
@@ -217,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
             $db->insert('installation_detailed_addresses', $addressData);
 
             // Process overall installation photos (before & after)
-            $overallPhotoTypes = ['overall_before_photos' => 'before', 'overall_after_photos' => 'after'];
+            $overallPhotoTypes = ['overall_before_photos' => 'before', 'overall_after_photos' => 'after', 'overall_store_photos' => 'StoreImage'];
             foreach ($overallPhotoTypes as $fileKey => $photoType) {
                 if (isset($_FILES[$fileKey]) && !empty($_FILES[$fileKey]['name'][0])) {
                     $fileCount = count($_FILES[$fileKey]['name']);
@@ -233,7 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                         ];
 
                         // Upload with GPS watermark
-                        $photoPath = $photoType === 'before' ? BEFORE_PHOTO_PATH : AFTER_PHOTO_PATH;
+                        $photoPath = $photoType === 'before' ? BEFORE_PHOTO_PATH : ($photoType === 'after' ? AFTER_PHOTO_PATH : STORE_PHOTO_PATH);
                         $photoResult = uploadImage($file, $photoPath, $latitude, $longitude);
 
                         if (!$photoResult['success']) {
@@ -259,13 +265,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                 // Process multiple before/after photos for this item
                 $beforePhotosKey = 'item_before_' . $aiId;
                 $afterPhotosKey = 'item_after_' . $aiId;
+                $storePhotosKey = 'item_store_photos_' . $aiId;
 
                 $firstBeforePhoto = null;
                 $firstAfterPhoto = null;
+                $storeImagePhoto = null;
 
                 // Temporary storage for uploaded filenames
                 $beforePhotoFilenames = [];
                 $afterPhotoFilenames = [];
+                $StoreImageFilenames = [];
+
+                // Upload before photos with GPS watermark
+                if (isset($_FILES[$storePhotosKey]) && !empty($_FILES[$storePhotosKey]['name'][0])) {
+                    $fileCount = count($_FILES[$storePhotosKey]['name']);
+
+                    for ($i = 0; $i < $fileCount; $i++) {
+                        $file = [
+                            'name' => $_FILES[$storePhotosKey]['name'][$i],
+                            'type' => $_FILES[$storePhotosKey]['type'][$i],
+                            'tmp_name' => $_FILES[$storePhotosKey]['tmp_name'][$i],
+                            'error' => $_FILES[$storePhotosKey]['error'][$i],
+                            'size' => $_FILES[$storePhotosKey]['size'][$i]
+                        ];
+
+                        $storeResult = uploadImage($file, STORE_PHOTO_PATH, $latitude, $longitude);
+
+                        if (!$storeResult['success']) {
+                            throw new Exception("Failed to upload before photo for item {$aiId}: " . $storeResult['message']);
+                        }
+
+                        $StoreImageFilenames[] = $storeResult['filename'];
+
+                        // Keep first photo for backward compatibility
+                        if ($i === 0) {
+                            $firstStorePhoto = $storeResult['filename'];
+                        }
+                    }
+                }
 
                 // Upload before photos with GPS watermark
                 if (isset($_FILES[$beforePhotosKey]) && !empty($_FILES[$beforePhotosKey]['name'][0])) {
@@ -348,6 +385,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                     $db->insert('installation_item_photos', [
                         'report_item_id' => $reportItemId,
                         'photo_type' => 'after',
+                        'photo_filename' => $filename,
+                        'display_order' => $i
+                    ]);
+                }
+
+                foreach ($StoreImageFilenames as $i => $filename) {
+                    $db->insert('installation_item_photos', [
+                        'report_item_id' => $reportItemId,
+                        'photo_type' => 'StoreImage',
                         'photo_filename' => $filename,
                         'display_order' => $i
                     ]);
@@ -606,6 +652,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
+                            <label for="store_status" class="form-label">Store Status Upon Visit <span class="text-danger">*</span></label>
+                            <select class="form-select" id="store_status" name="store_status" required>
+                                <option value="">-- Select Status --</option>
+                                <option value="agree_to_dressup" <?= old('store_status') == 'agree_to_dressup' ? 'selected' : '' ?>>Agree to Dress-Up</option>
+                                <option value="store_closed" <?= old('store_status') == 'store_closed' ? 'selected' : '' ?>>Store Closed</option>
+                                <option value="refused_to_dressup" <?= old('store_status') == 'refused_to_dressup' ? 'selected' : '' ?>>Refused to Dress-Up</option>
+                                <option value="reschedule" <?= old('store_status') == 'reschedule' ? 'selected' : '' ?>>Reschedule</option>
+                                <option value="others" <?= old('store_status') == 'others' ? 'selected' : '' ?>>Others</option>
+                            </select>
+                        </div>
+                    
+                        <div class="col-md-6 mb-3">
                             <label for="store_type" class="form-label">Store Type <span class="text-danger">*</span></label>
                             <select class="form-select" id="store_type" name="store_type" required>
                                 <option value="">-- Select Type --</option>
@@ -616,16 +674,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="store_status" class="form-label">Store Status Upon Visit <span class="text-danger">*</span></label>
-                            <select class="form-select" id="store_status" name="store_status" required>
-                                <option value="">-- Select Status --</option>
-                                <option value="agree_to_dressup" <?= old('store_status') == 'agree_to_dressup' ? 'selected' : '' ?>>Agree to Dress-Up</option>
-                                <option value="store_closed" <?= old('store_status') == 'store_closed' ? 'selected' : '' ?>>Store Closed</option>
-                                <option value="refused_to_dressup" <?= old('store_status') == 'refused_to_dressup' ? 'selected' : '' ?>>Refused to Dress-Up</option>
-                                <option value="reschedule" <?= old('store_status') == 'reschedule' ? 'selected' : '' ?>>Reschedule</option>
-                                <option value="others" <?= old('store_status') == 'others' ? 'selected' : '' ?>>Others</option>
-                            </select>
+
+                        <div class="col-md-12 mb-3">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-camera me-1"></i>Upload Store Image
+                                </label>
+                                <div class="multi-photo-upload" data-type="overall_store">
+                                    <input type="file" class="d-none" id="overall_store_input"
+                                        name="overall_store_photos[]" accept="image/*" capture="environment" multiple>
+                                    <div class="upload-placeholder" onclick="document.getElementById('overall_store_input').click()">
+                                        <i class="bi bi-cloud-upload display-6 text-muted"></i>
+                                        <p class="mb-1">Click to upload or take photos</p>
+                                        <small class="text-muted">You can select multiple photos at once</small>
+                                    </div>
+                                    <div class="photo-preview-grid" id="overall_store_preview"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
