@@ -130,10 +130,21 @@ $progress = $totalAssigned > 0 ? round(($totalInstalled / $totalAssigned) * 100)
                         <td><strong><?php echo clean($assignment['assigned_to_name']); ?></strong></td>
                     </tr>
                     <?php if ($assignment['assigned_to_phone']): ?>
-                    <tr>
-                        <td class="text-muted">Phone:</td>
-                        <td><a href="tel:<?php echo $assignment['assigned_to_phone']; ?>"><?php echo clean($assignment['assigned_to_phone']); ?></a></td>
-                    </tr>
+<tr>
+    <td class="text-muted">Phone:</td>
+    <td>
+        <div class="d-flex align-items-center gap-1">
+            <span><?php echo clean($assignment['assigned_to_phone']); ?></span>
+            <button
+                type="button"
+                class="btn p-0"
+                style="border: none; background: none;"
+                onclick="copyPhone('<?php echo addslashes($assignment['assigned_to_phone']); ?>', this)">
+                <i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>
+            </button>
+        </div>
+    </td>
+</tr>
                     <?php endif; ?>
                     <tr>
                         <td class="text-muted">Assigned By:</td>
@@ -353,5 +364,40 @@ $progress = $totalAssigned > 0 ? round(($totalInstalled / $totalAssigned) * 100)
         </div>
     </div>
 </div>
+
+<script>
+function copyPhone(number, button) {
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(number).then(function() {
+            button.innerHTML = '<i class="bi bi-check-lg text-success" style="font-size: 14px;"></i>';
+            setTimeout(function() {
+                button.innerHTML = '<i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>';
+            }, 1500);
+        }).catch(function(err) {
+            fallbackCopy(number);
+        });
+    } else {
+        fallbackCopy(number);
+    }
+
+    function fallbackCopy(text) {
+        let textarea = document.createElement("textarea");
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand("copy");
+            button.innerHTML = '<i class="bi bi-check-lg text-success" style="font-size: 14px;"></i>';
+        } catch (err) {
+            alert('Failed to copy number');
+        }
+        document.body.removeChild(textarea);
+
+        setTimeout(function() {
+            button.innerHTML = '<i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>';
+        }, 1500);
+    }
+}
+</script>
 
 <?php require_once '../../includes/footer.php'; ?>
