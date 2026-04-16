@@ -181,15 +181,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
         // Check files - now supporting multiple photos
         $beforePhotosKey = 'item_before_' . $aiId;
         $afterPhotosKey = 'item_after_' . $aiId;
-        $storePhotosKey = 'item_store_photos_' . $aiId;
 
         if (empty($_FILES[$beforePhotosKey]['name'][0]) || empty($_FILES[$afterPhotosKey]['name'][0])) {
             $errors['photos'] = 'Before and after photos are required for all items';
-            break;
-        }
-
-        if (empty($_FILES[$storePhotosKey]['name'][0])) {
-            $errors['store_photos'] = 'Store photos are required for all items';
             break;
         }
     }
@@ -222,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
             $addressData['report_id'] = $reportId;
             $db->insert('installation_detailed_addresses', $addressData);
 
-            // Process overall installation photos (before & after)
+            // Process overall installation photos (before & after & store)
             $overallPhotoTypes = ['overall_before_photos' => 'before', 'overall_after_photos' => 'after', 'overall_store_photos' => 'StoreImage'];
             foreach ($overallPhotoTypes as $fileKey => $photoType) {
                 if (isset($_FILES[$fileKey]) && !empty($_FILES[$fileKey]['name'][0])) {
@@ -247,12 +241,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                         }
 
                         // Insert into installation_report_photos table
-                        $db->insert('installation_report_photos', [
-                            'report_id' => $reportId,
-                            'photo_type' => $photoType,
-                            'photo_filename' => $photoResult['filename'],
-                            'display_order' => $i
-                        ]);
+                        try {
+                            $insertResult = $db->insert('installation_report_photos', [
+                                'report_id' => $reportId,
+                                'photo_type' => $photoType,
+                                'photo_filename' => $photoResult['filename'],
+                                'display_order' => $i
+                            ]);
+                            
+                            if (!$insertResult) {
+                                error_log("Failed to insert {$photoType} photo for report {$reportId}: Insert returned false");
+                                throw new Exception("Failed to save {$photoType} photo to database");
+                            }
+                        } catch (Exception $e) {
+                            error_log("Error inserting {$photoType} photo: " . $e->getMessage());
+                            throw $e;
+                        }
                     }
                 }
             }
@@ -265,44 +269,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                 // Process multiple before/after photos for this item
                 $beforePhotosKey = 'item_before_' . $aiId;
                 $afterPhotosKey = 'item_after_' . $aiId;
-                $storePhotosKey = 'item_store_photos_' . $aiId;
 
                 $firstBeforePhoto = null;
                 $firstAfterPhoto = null;
-                $storeImagePhoto = null;
 
                 // Temporary storage for uploaded filenames
                 $beforePhotoFilenames = [];
                 $afterPhotoFilenames = [];
-                $StoreImageFilenames = [];
-
-                // Upload before photos with GPS watermark
-                if (isset($_FILES[$storePhotosKey]) && !empty($_FILES[$storePhotosKey]['name'][0])) {
-                    $fileCount = count($_FILES[$storePhotosKey]['name']);
-
-                    for ($i = 0; $i < $fileCount; $i++) {
-                        $file = [
-                            'name' => $_FILES[$storePhotosKey]['name'][$i],
-                            'type' => $_FILES[$storePhotosKey]['type'][$i],
-                            'tmp_name' => $_FILES[$storePhotosKey]['tmp_name'][$i],
-                            'error' => $_FILES[$storePhotosKey]['error'][$i],
-                            'size' => $_FILES[$storePhotosKey]['size'][$i]
-                        ];
-
-                        $storeResult = uploadImage($file, STORE_PHOTO_PATH, $latitude, $longitude);
-
-                        if (!$storeResult['success']) {
-                            throw new Exception("Failed to upload before photo for item {$aiId}: " . $storeResult['message']);
-                        }
-
-                        $StoreImageFilenames[] = $storeResult['filename'];
-
-                        // Keep first photo for backward compatibility
-                        if ($i === 0) {
-                            $firstStorePhoto = $storeResult['filename'];
-                        }
-                    }
-                }
 
                 // Upload before photos with GPS watermark
                 if (isset($_FILES[$beforePhotosKey]) && !empty($_FILES[$beforePhotosKey]['name'][0])) {
@@ -385,15 +358,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
                     $db->insert('installation_item_photos', [
                         'report_item_id' => $reportItemId,
                         'photo_type' => 'after',
-                        'photo_filename' => $filename,
-                        'display_order' => $i
-                    ]);
-                }
-
-                foreach ($StoreImageFilenames as $i => $filename) {
-                    $db->insert('installation_item_photos', [
-                        'report_item_id' => $reportItemId,
-                        'photo_type' => 'StoreImage',
                         'photo_filename' => $filename,
                         'display_order' => $i
                     ]);
@@ -1167,6 +1131,7 @@ function initPhotoUploads() {
     // Overall photos
     setupPhotoUpload('overall_before_input', 'overall_before_preview');
     setupPhotoUpload('overall_after_input', 'overall_after_preview');
+    setupPhotoUpload('overall_store_input', 'overall_store_preview');
 
     // Item photos - dynamically handled
     document.querySelectorAll('.item-photo-input').forEach(input => {

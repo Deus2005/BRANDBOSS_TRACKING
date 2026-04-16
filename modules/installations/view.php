@@ -82,6 +82,7 @@ $overallPhotos = $db->fetchAll(
 // Group overall photos by type
 $overallBeforePhotos = array_filter($overallPhotos, fn($p) => $p['photo_type'] === 'before');
 $overallAfterPhotos = array_filter($overallPhotos, fn($p) => $p['photo_type'] === 'after');
+$overallStorePhotos = array_filter($overallPhotos, fn($p) => $p['photo_type'] === 'StoreImage');
 
 // Get report items with photos
 $reportItems = $db->fetchAll(
@@ -547,7 +548,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         </div>
 
         <!-- Overall Installation Photos -->
-        <?php if (!empty($overallBeforePhotos) || !empty($overallAfterPhotos)): ?>
+        <?php if (!empty($overallBeforePhotos) || !empty($overallAfterPhotos) || !empty($overallStorePhotos)): ?>
         <div class="card mb-4">
             <div class="card-header bg-primary">
                 <i class="bi bi-images me-2"></i>Overall Installation Photos
@@ -577,13 +578,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
 
                 <?php if (!empty($overallAfterPhotos)): ?>
                 <h6 class="text-muted mb-3"><i class="bi bi-image me-1"></i>After Installation</h6>
-                <div class="row g-2">
+                <div class="row g-2 mb-4">
                     <?php foreach ($overallAfterPhotos as $photo): ?>
                     <div class="col-6 col-md-4 col-lg-3">
                         <a href="<?php echo APP_URL; ?>/uploads/after/<?php echo $photo['photo_filename']; ?>"
                            target="_blank" class="d-block position-relative photo-thumbnail">
                             <img src="<?php echo APP_URL; ?>/uploads/after/<?php echo $photo['photo_filename']; ?>"
                                  class="img-fluid rounded" alt="After"
+                                 style="aspect-ratio: 1; object-fit: cover; width: 100%;">
+                            <span class="position-absolute top-0 start-0 m-2 badge bg-dark bg-opacity-75">
+                                <?php echo $photo['display_order'] + 1; ?>
+                            </span>
+                        </a>
+                        <?php if ($photo['caption']): ?>
+                        <small class="text-muted d-block mt-1"><?php echo clean($photo['caption']); ?></small>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+
+                <?php if (!empty($overallStorePhotos)): ?>
+                <h6 class="text-muted mb-3"><i class="bi bi-building me-1"></i>Store Photos</h6>
+                <div class="row g-2">
+                    <?php foreach ($overallStorePhotos as $photo): ?>
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <a href="<?php echo APP_URL; ?>/uploads/store_images/<?php echo $photo['photo_filename']; ?>"
+                           target="_blank" class="d-block position-relative photo-thumbnail">
+                            <img src="<?php echo APP_URL; ?>/uploads/store_images/<?php echo $photo['photo_filename']; ?>"
+                                 class="img-fluid rounded" alt="Store"
                                  style="aspect-ratio: 1; object-fit: cover; width: 100%;">
                             <span class="position-absolute top-0 start-0 m-2 badge bg-dark bg-opacity-75">
                                 <?php echo $photo['display_order'] + 1; ?>
