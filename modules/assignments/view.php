@@ -111,7 +111,9 @@ $progress = $totalAssigned > 0 ? round(($totalInstalled / $totalAssigned) * 100)
     <div class="col-lg-4 mb-4">
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-info-circle me-2"></i>Assignment Information
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-info-circle me-2"></span>Assignment Information
+        </span>
             </div>
             <div class="card-body">
                 <div class="text-center mb-3">
@@ -170,7 +172,9 @@ $progress = $totalAssigned > 0 ? round(($totalInstalled / $totalAssigned) * 100)
         
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-geo-alt me-2"></i>Installation Area
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-geo-alt me-2"></span>Installation Area
+                </span>
             </div>
             <div class="card-body">
                 <h5 class="mb-1"><?php echo clean($assignment['area_name']); ?></h5>
@@ -198,7 +202,9 @@ $progress = $totalAssigned > 0 ? round(($totalInstalled / $totalAssigned) * 100)
         <!-- Progress -->
         <div class="card">
             <div class="card-header bg-primary">
-                <i class="bi bi-graph-up me-2"></i>Progress
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-graph-up me-2"></span>Progress
+                </span>
             </div>
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">
@@ -235,8 +241,10 @@ $progress = $totalAssigned > 0 ? round(($totalInstalled / $totalAssigned) * 100)
     <div class="col-lg-8 mb-4">
         <!-- Assignment Items -->
         <div class="card mb-4">
-            <div class="card-header bg-primary">
-                <i class="bi bi-box-seam me-2"></i>Assignment Items
+            <div class="card-header bg-dark text-white">
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-box-seam me-2"></span>Assignment Items
+                </span>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -284,7 +292,9 @@ $progress = $totalAssigned > 0 ? round(($totalInstalled / $totalAssigned) * 100)
         <!-- Installation Reports -->
         <div class="card">
             <div class="card-header bg-primary">
-                <i class="bi bi-camera me-2"></i>Installation Reports
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-camera me-2"></span>Installation Reports
+                                    </span>
             </div>
             <div class="card-body p-0">
                 <?php if (empty($installations)): ?>
