@@ -480,15 +480,6 @@ function openFullMap(lat, lng) {
     container.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
-
-function closeFullMap() {
-    const container = document.getElementById('fullMapContainer');
-    const iframe = document.getElementById('fullMapFrame');
-
-    container.style.display = 'none';
-    iframe.src = '';
-    document.body.style.overflow = 'auto';
-}
 </script>
 
 <?php require_once '../../includes/footer.php'; ?>
