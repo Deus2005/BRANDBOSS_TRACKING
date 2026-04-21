@@ -125,7 +125,7 @@ $canCreate = in_array($currentRole, ['super_admin', 'user_1']);
                 </select>
             </div>
             <div class="col-md-4">
-                <a href="index.php" class="btn btn-outline-secondary">
+                <a href="index.php" class="btn btn-primary">
                     <i class="bi bi-x-lg"></i> Clear
                 </a>
             </div>
