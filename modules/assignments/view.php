@@ -302,7 +302,7 @@ $progress = $totalAssigned > 0 ? round(($totalInstalled / $totalAssigned) * 100)
         
         <!-- Installation Reports -->
         <div class="card">
-            <div class="card-header bg-primary">
+            <div class="card-header bg-dark text-white">
                 <span class= "d-flex align-text-center">
                 <span class="bi bi-camera me-2"></span>Installation Reports
                                     </span>
