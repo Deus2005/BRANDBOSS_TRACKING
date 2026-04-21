@@ -119,24 +119,97 @@ try {
             break;
             
         case 'view_response':
-            // View individual response details
-            $responseId = intval($_POST['response_id'] ?? 0);
-            
-            if (!$auth->can('surveys')) {
-                throw new Exception('Permission denied');
-            }
-            
-            $response = $db->fetch(
-                "SELECT sr.*, s.created_by, s.is_anonymous 
-                 FROM survey_responses sr 
-                 JOIN surveys s ON sr.survey_id = s.id 
-                 WHERE sr.id = ?",
-                [$responseId]
-            );
-            
-            if (!$response) {
-                throw new Exception('Response not found');
-            }
+    // View individual response details
+    $responseId = intval($_POST['response_id'] ?? 0);
+
+    if (!$responseId) {
+        throw new Exception('Invalid response ID');
+    }
+
+    $response = $db->fetch(
+        "SELECT sr.*, s.created_by, s.is_anonymous, s.id AS survey_id
+         FROM survey_responses sr
+         JOIN surveys s ON sr.survey_id = s.id
+         WHERE sr.id = ? AND sr.status = 'completed'",
+        [$responseId]
+    );
+
+    if (!$response) {
+        throw new Exception('Response not found');
+    }
+
+    $currentUserId = $auth->userId();
+    $currentRole = $auth->role();
+
+    $canView = false;
+
+    // Allow user to view their own response
+    if ((int)$response['respondent_id'] === (int)$currentUserId) {
+        $canView = true;
+    }
+
+    // Allow users with surveys permission (admin/manager) to view any response
+    if ($auth->can('surveys')) {
+        $canView = true;
+    }
+
+    // Optional: allow survey creator with role user_1 to view responses to their own survey
+    if ($currentRole === 'user_1' && (int)$response['created_by'] === (int)$currentUserId) {
+        $canView = true;
+    }
+
+    if (!$canView) {
+        throw new Exception('Permission denied');
+    }
+
+    $answers = $db->fetchAll(
+        "SELECT q.question_text, q.question_type, q.sort_order,
+                a.answer_text, a.answer_options, a.rating_value
+         FROM survey_questions q
+         LEFT JOIN survey_answers a
+            ON a.question_id = q.id
+           AND a.response_id = ?
+         WHERE q.survey_id = ?
+         ORDER BY q.sort_order ASC, q.id ASC",
+        [$responseId, $response['survey_id']]
+    );
+
+    $data = [];
+
+    foreach ($answers as $a) {
+        $answerValue = '';
+
+        switch ($a['question_type']) {
+            case 'checkbox':
+                $selected = json_decode($a['answer_options'], true);
+                $answerValue = !empty($selected) ? implode(', ', $selected) : '';
+                break;
+
+            case 'radio':
+            case 'dropdown':
+                $answerValue = $a['answer_options'] ?? '';
+                break;
+
+            case 'rating':
+                $answerValue = $a['rating_value'] ?? '';
+                break;
+
+            default:
+                $answerValue = $a['answer_text'] ?? '';
+                break;
+        }
+
+        $data[] = [
+            'question' => $a['question_text'],
+            'answer' => $answerValue
+        ];
+    }
+
+    echo json_encode([
+        'success' => true,
+        'data' => $data
+    ]);
+    exit;
             
             // Check permission
             if ($currentRole === 'user_1' && $response['created_by'] != $userId) {
