@@ -790,7 +790,7 @@ INSERT INTO `installation_report_items` (`id`, `report_id`, `assignment_item_id`
 CREATE TABLE `installation_report_photos` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `report_id` bigint(20) UNSIGNED NOT NULL,
-  `photo_type` enum('before','after') NOT NULL COMMENT 'Before or after installation',
+  `photo_type` enum('before','after','StoreImage') NOT NULL COMMENT 'Before, after installation or store photos',
   `photo_filename` varchar(255) NOT NULL COMMENT 'Filename with GPS watermark',
   `caption` varchar(255) DEFAULT NULL COMMENT 'Optional description',
   `display_order` tinyint(3) UNSIGNED DEFAULT 0 COMMENT 'Order for display (0-255)',
