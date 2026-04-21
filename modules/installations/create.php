@@ -469,9 +469,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
 <!-- Assignment Selection -->
 <div class="card">
     <div class="card-header bg-primary">
-        <i class="bi bi-clipboard-check me-2"></i>Select Assignment
+        <span class="d-flex align-text-center">
+        <span class="bi bi-clipboard-check me-2"></span>Select Assignment
     </div>
-    <div class="card-body">
+    <div class="card-body bg-danger-subtle"
         <p class="text-muted">Choose an assignment to submit installation report:</p>
         <div class="row g-3">
             <?php foreach ($myAssignments as $assign): ?>
