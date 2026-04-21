@@ -512,7 +512,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
         <div class="col-lg-4 mb-4">
             <div class="card mb-3">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-info-circle me-2"></i>Assignment Details
+                    <span class= "d-flex align-text-center">
+                    <span class="bi bi-info-circle me-2"></span>Assignment Details
+</span>
                 </div>
                 <div class="card-body">
                     <p class="mb-2"><strong>Code:</strong> <?php echo clean($selectedAssignment['assignment_code']); ?></p>
@@ -523,7 +525,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
             </div>
             <div class="card mb-3">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-geo-alt me-2"></i>GPS Location
+                    <span class="d-flex align-text-center">
+                    <span class="bi bi-geo-alt me-2"></span>GPS Location
+</span>
                 </div>
                 <div class="card-body">
                     <?php if (isset($errors['gps'])): ?>
@@ -555,7 +559,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
 
             <div class="card mb-2">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-geo-alt me-2"></i>Manual Coordinates (Optional)
+                    <span class="d-flex align-text-center">
+                    <span class="bi bi-geo-alt me-2"></span>Manual Coordinates (Optional)
                 </div>
                 <div class="card-body">
                     <?php if (isset($errors['mnl_gps'])): ?>
@@ -574,7 +579,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
             
             <div class="card">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-calendar me-2"></i>Report Details
+                    <span class="d-flex align-text-center">
+                    <span class="bi bi-calendar me-2"></span>Report Details
+                    </span>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -595,7 +602,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
             <!-- Store Information -->
             <div class="card mb-3">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-shop me-2"></i>Store Information
+                    <span class="d-flex align-text-center">
+                    <span class="bi bi-shop me-2"></span>Store Information
+                    </span> 
                 </div>
                 <div class="card-body">
                     <?php if (isset($errors['store'])): ?>
@@ -707,7 +716,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
             <!-- Store Address -->
             <div class="card mb-3">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-geo-alt me-2"></i>Store Address (Complete Address)
+                    <span class="d-flex align-text-center">
+                    <span class="bi bi-geo-alt me-2"></span>Store Address (Complete Address)
+                                </span>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -793,7 +804,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
 
             <div class="card mb-3">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-rulers me-2"></i>Store Area Measurement
+                    <span class="d-flex align-text-center">
+                    <span class="bi bi-rulers me-2"></span>Store Area Measurement
+                            </span>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -837,7 +850,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
             <!-- Overall Installation Photos -->
             <div class="card mb-3">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-images me-2"></i>Overall Installation Photos
+                    <span class="d-flex align-text-center">
+                    <span class="bi bi-images me-2"></span>Overall Installation Photos
+                            </span>
                 </div>
                 <div class="card-body">
                     <p class="text-muted small mb-3">
@@ -890,7 +905,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
         <div class="col-lg-8 mb-4">
             <div class="card">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-box-seam me-2"></i>Items to Install
+                    <span class="d-flex align-text-center">
+                    <span class="bi bi-box-seam me-2"></span>Items to Install
+                            </span>
                 </div>
                 <div class="card-body">
                     <?php if (isset($errors['items'])): ?>
