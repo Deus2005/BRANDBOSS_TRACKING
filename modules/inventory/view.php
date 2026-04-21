@@ -83,7 +83,9 @@ $assignments = $db->fetchAll(
     <div class="col-lg-4 mb-4">
         <div class="card h-100">
             <div class="card-header bg-primary">
-                <i class="bi bi-info-circle me-2"></i>Item Information
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-info-circle me-2"></span>Item Information
+</span>
             </div>
             <div class="card-body">
                 <div class="text-center mb-4">
@@ -174,8 +176,10 @@ $assignments = $db->fetchAll(
         
         <!-- Transaction History -->
         <div class="card">
-            <div class="card-header bg-primary">
-                <i class="bi bi-clock-history me-2"></i>Transaction History
+            <div class="card-header bg-dark text-white">
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-clock-history me-2"></span>Transaction History
+        </span>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
@@ -247,8 +251,10 @@ $assignments = $db->fetchAll(
 <!-- Assignment Usage -->
 <?php if (!empty($assignments)): ?>
 <div class="card">
-    <div class="card-header bg-primary">
-        <i class="bi bi-clipboard-check me-2"></i>Assignment Usage
+    <div class="card-header bg-dark text-white">
+        <span class="d-flex align-text-center">
+        <span class="bi bi-clipboard-check me-2"></span>Assignment Usage
+</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
