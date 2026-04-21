@@ -93,7 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="card">
     <div class="card-header bg-primary">
-        <i class="bi bi-box-seam me-2"></i>Item Information
+        <span class="d-flex align-text-center">
+        <span class="bi bi-box-seam me-2"></span>Item Information
     </div>
     <div class="card-body">
         <form method="POST" action="">
