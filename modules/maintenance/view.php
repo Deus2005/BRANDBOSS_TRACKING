@@ -428,9 +428,6 @@ unset($request);
 ">
 <div style="position:absolute; top:80%;right:20px; transform:translateY(-50%);
 ">
-    <button class="btn btn-danger px-4" onclick="closeFullMap()">
-        Close
-    </button>
 </div>
     <iframe
         id="fullMapFrame"style
