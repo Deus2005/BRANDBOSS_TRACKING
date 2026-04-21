@@ -233,8 +233,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
                     </tr>
                     <?php if ($installation['installer_phone']): ?>
                     <tr>
-                        <td class="text-muted">Phone:</td>
-                        <td><a href="tel:<?php echo $installation['installer_phone']; ?>"><?php echo clean($installation['installer_phone']); ?></a></td>
+                         <td class="text-muted">Phone:</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-1">
+                            <span><?php echo clean($installation['installer_phone']); ?></span>
+
+                            <button
+                                type="button"
+                                class="btn p-0"
+                                style="border: none; background: none;"
+                                onclick="copyPhone('<?php echo addslashes($installation['installer_phone']); ?>', this)">
+                                
+                                <i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>
+                            </button>
+                        </div>
+                    </td>
                     </tr>
                     <?php endif; ?>
 
@@ -365,7 +378,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
                     <?php if ($installation['store_name_after']): ?>
                     <tr>
                         <td class="text-muted">Name After:</td>
-                        <td><strong><?php echo clean($installation['store_name_after']); ?></strong></td>
+                        <td><?php echo clean($installation['store_name_after']); ?></td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php if ($installation['contact_number']): ?>
+                    <tr>
+                        <td class="text-muted">Contact:</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-1">
+                                <span><?php echo clean(preg_replace('/[^0-9]/', '', $installation['contact_number'])); ?></span>
+
+                            <button
+                                type="button"
+                                class="btn p-0"
+                                style="border: none; background: none;"
+                                onclick="copyPhone('<?php echo addslashes(preg_replace('/[^0-9]/', '', $installation['contact_number'])); ?>', this)">
+                                
+                                <i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>
+                            </button>
+                        </div>
+                    </td>
                     </tr>
                     <?php endif; ?>
                     <tr>
@@ -375,10 +407,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
                      <tr>
                         <td class="text-muted">Store Type:</td>
                         <td><strong><?php echo clean($installation['store_type']); ?></strong></td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">Contact:</td>
-                        <td><a href="tel:<?php echo str_replace('-', '', $installation['contact_number']); ?>"><?php echo clean($installation['contact_number']); ?></a></td>
                     </tr>
                     <?php if ($installation['total_area_sqm'] > 0): ?>
                     <tr>
