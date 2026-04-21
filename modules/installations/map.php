@@ -39,9 +39,14 @@ if (!$lat || !$lng) {
     <h1 class="page-title mb-0">
         <i class="bi bi-geo-alt me-2"></i>Location Map
     </h1>
-    <a href="javascript:history.back()" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Back
-    </a>
+    <div class="con">
+        <button class="btn btn-danger px-4" onclick="closeFullMap()">
+            Close
+        </button>          
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>      
+    </div>
 </div>
 
 <div class="card">

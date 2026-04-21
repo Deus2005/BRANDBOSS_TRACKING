@@ -233,27 +233,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
                     </tr>
                     <?php if ($installation['installer_phone']): ?>
                     <tr>
-                         <td class="text-muted">Phone:</td>
-                    <td>
-                        <div class="d-flex align-items-center gap-1">
-                            <span><?php echo clean($installation['installer_phone']); ?></span>
-
-                            <button
-                                type="button"
-                                class="btn p-0"
-                                style="border: none; background: none;"
-                                onclick="copyPhone('<?php echo addslashes($installation['installer_phone']); ?>', this)">
-                                
-                                <i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>
-                            </button>
-                        </div>
-                    </td>
+                        <td class="text-muted">Phone:</td>
+                        <td><a href="tel:<?php echo $installation['installer_phone']; ?>"><?php echo clean($installation['installer_phone']); ?></a></td>
                     </tr>
                     <?php endif; ?>
-                    <tr>
-                        <td class="text-muted">Install Date:</td>
-                        <td><?php echo formatDate($installation['installation_date']); ?></td>
-                    </tr>
+
                     <tr>
                         <td class="text-muted">Submitted:</td>
                         <td><?php echo formatDateTime($installation['created_at']); ?></td>
@@ -394,20 +378,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
                     </tr>
                     <tr>
                         <td class="text-muted">Contact:</td>
-                <td>
-                    <div class="d-flex align-items-center gap-1">
-                        <span><?php echo clean(preg_replace('/[^0-9]/', '', $installation['contact_number'])); ?></span>
-
-                        <button
-                            type="button"
-                            class="btn p-0"
-                            style="border: none; background: none;"
-                            onclick="copyPhone('<?php echo addslashes(preg_replace('/[^0-9]/', '', $installation['contact_number'])); ?>', this)">
-                            
-                            <i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>
-                        </button>
-                    </div>
-                </td>
+                        <td><a href="tel:<?php echo str_replace('-', '', $installation['contact_number']); ?>"><?php echo clean($installation['contact_number']); ?></a></td>
                     </tr>
                     <?php if ($installation['total_area_sqm'] > 0): ?>
                     <tr>
@@ -834,6 +805,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
 </div>
 
 <script>
+function copyPhone(number, button) {
+    navigator.clipboard.writeText(number).then(function() {
+        button.innerHTML = '<i class="bi bi-check-lg text-success" style="font-size: 14px;"></i>';
+
+        setTimeout(function() {
+            button.innerHTML = '<i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>';
+        }, 1500);
+    }).catch(function(err) {
+        console.error('Copy failed:', err);
+        alert('Failed to copy number');
+    });
+}
+
 function copyPhone(number, button) {
     navigator.clipboard.writeText(number).then(function() {
         button.innerHTML = '<i class="bi bi-check-lg text-success" style="font-size: 14px;"></i>';
