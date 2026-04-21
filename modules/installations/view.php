@@ -206,7 +206,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
     <div class="col-lg-4 mb-4">
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-info-circle me-2"></i>Report Information
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-info-circle me-2"></span>Report Information
+</span>
             </div>
             <div class="card-body">
                 <div class="text-center mb-3">
@@ -231,8 +233,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
                     </tr>
                     <?php if ($installation['installer_phone']): ?>
                     <tr>
-                        <td class="text-muted">Phone:</td>
-                        <td><a href="tel:<?php echo $installation['installer_phone']; ?>"><?php echo clean($installation['installer_phone']); ?></a></td>
+                         <td class="text-muted">Phone:</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-1">
+                            <span><?php echo clean($installation['installer_phone']); ?></span>
+
+                            <button
+                                type="button"
+                                class="btn p-0"
+                                style="border: none; background: none;"
+                                onclick="copyPhone('<?php echo addslashes($installation['installer_phone']); ?>', this)">
+                                
+                                <i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>
+                            </button>
+                        </div>
+                    </td>
                     </tr>
                     <?php endif; ?>
                     <tr>
@@ -259,7 +274,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-geo-alt me-2"></i>Location
+                <span class= "d-flex align-text-center"> 
+                <span class="bi bi-geo-alt me-2"></span>Location
+                    </span>
             </div>
             <div class="card-body">
                 <h5 class="mb-1"><?php echo clean($installation['area_name']); ?></h5>
@@ -310,7 +327,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         <!-- Store Details -->
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-shop me-2"></i>Store Details
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-shop me-2"></span>Store Details
+        </span>
             </div>
             <div class="card-body">
                 <table class="table table-sm table-borderless mb-0">
@@ -375,7 +394,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
                     </tr>
                     <tr>
                         <td class="text-muted">Contact:</td>
-                        <td><a href="tel:<?php echo str_replace('-', '', $installation['contact_number']); ?>"><?php echo clean($installation['contact_number']); ?></a></td>
+                <td>
+                    <div class="d-flex align-items-center gap-1">
+                        <span><?php echo clean(preg_replace('/[^0-9]/', '', $installation['contact_number'])); ?></span>
+
+                        <button
+                            type="button"
+                            class="btn p-0"
+                            style="border: none; background: none;"
+                            onclick="copyPhone('<?php echo addslashes(preg_replace('/[^0-9]/', '', $installation['contact_number'])); ?>', this)">
+                            
+                            <i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>
+                        </button>
+                    </div>
+                </td>
                     </tr>
                     <?php if ($installation['total_area_sqm'] > 0): ?>
                     <tr>
@@ -396,7 +428,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         <?php if (isset($installation['complete_address'])): ?>
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-pin-map me-2"></i>Complete Address
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-pin-map me-2"></span>Complete Address
+        </span>
             </div>
             <div class="card-body">
                 <p class="mb-2"><strong><?php echo clean($installation['complete_address']); ?></strong></p>
@@ -450,7 +484,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         <?php if (in_array($currentRole, ['super_admin', 'user_1']) && $installation['status'] === 'submitted'): ?>
         <div class="card border-warning">
             <div class="card-header bg-warning text-dark">
-                <i class="bi bi-check2-square me-2"></i>Review Actions
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-check2-square me-2"></span>Review Actions
             </div>
             <div class="card-body">
                 <p class="mb-3">Review this installation report:</p>
@@ -551,7 +586,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         <?php if (!empty($overallBeforePhotos) || !empty($overallAfterPhotos) || !empty($overallStorePhotos)): ?>
         <div class="card mb-4">
             <div class="card-header bg-primary">
-                <i class="bi bi-images me-2"></i>Overall Installation Photos
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-images me-2"></span> Overall Installation Photos
+        </span>
             </div>
             <div class="card-body">
                 <?php if (!empty($overallBeforePhotos)): ?>
@@ -626,7 +663,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         <!-- Installed Items -->
         <div class="card mb-4">
             <div class="card-header bg-primary">
-                <i class="bi bi-box-seam me-2"></i>Installed Items
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-box-seam me-2"></span>Installed Items
+                        </span>
             </div>
             <div class="card-body">
                 <?php foreach ($reportItems as $index => $item): ?>
@@ -737,7 +776,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         <!-- Inspection Schedule -->
         <div class="card">
             <div class="card-header bg-primary">
-                <i class="bi bi-calendar-check me-2"></i>Inspection Schedule (6 Months)
+                <span class= "d-flex align-text-center">
+                <span class="bi bi-calendar-check me-2"></span> Inspection Schedule (6 Months)
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -792,16 +832,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         </div>
     </div>
 </div>
-<script>
-function submitReview(action) {
-    document.getElementById('actionInput').value = action;
-    document.getElementById('reviewForm').submit();
-}
 
-function handleReject() {
-    document.getElementById('actionInput').value = 'reject';
-    document.getElementById('rejectMessageBox').style.display = 'block';
-    document.getElementById('confirmRejectBox').style.display = 'block';
+<script>
+function copyPhone(number, button) {
+    navigator.clipboard.writeText(number).then(function() {
+        button.innerHTML = '<i class="bi bi-check-lg text-success" style="font-size: 14px;"></i>';
+
+        setTimeout(function() {
+            button.innerHTML = '<i class="bi bi-copy text-secondary" style="font-size: 14px;"></i>';
+        }, 1500);
+    }).catch(function(err) {
+        console.error('Copy failed:', err);
+        alert('Failed to copy number');
+    });
 }
 </script>
 <?php require_once '../../includes/footer.php'; ?>
