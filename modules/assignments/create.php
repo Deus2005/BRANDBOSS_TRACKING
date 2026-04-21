@@ -148,7 +148,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-lg-5 mb-4">
             <div class="card h-100">
                 <div class="card-header bg-primary">
-                    <i class="bi bi-info-circle me-2"></i>Assignment Details
+                    <span class="d-flex align-text-center">
+                    <span class="bi bi-info-circle me-2"></span>Assignment Details
+</span>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -217,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Item Selection -->
         <div class="col-lg-7 mb-4">
             <div class="card h-100">
-                <div class="card-header bg-primary d-flex justify-content-between align-items-center">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                     <span><i class="bi bi-box-seam me-2"></i>Select Items</span>
                     <input type="text" class="form-control form-control-sm w-auto" id="itemSearch" placeholder="Search items...">
                 </div>
@@ -249,7 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 if ($item['category_name'] !== $currentCategory):
                                     $currentCategory = $item['category_name'];
                             ?>
-                            <tr class="table-secondary">
+                            <tr class="table-danger ">
                                 <td colspan="4"><strong><?php echo clean($currentCategory); ?></strong></td>
                             </tr>
                             <?php endif; ?>
