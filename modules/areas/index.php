@@ -143,10 +143,9 @@ $areas = $result['data'];
                        value="<?php echo clean($search); ?>">
             </div>
             <div class="col-md-4">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Search
-                </button>
-                <a href="index.php" class="btn btn-outline-secondary">Clear</a>
+                <a href="index.php" class="btn btn-danger">
+                    <i class="bi bi-x-lg"></i> Clear
+                </a>
             </div>
         </form>
     </div>
