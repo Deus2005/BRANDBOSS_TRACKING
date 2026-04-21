@@ -33,6 +33,9 @@ if ($installationId) {
 if (!$lat || !$lng) {
     redirect($_SERVER['HTTP_REFERER'] ?? APP_URL, 'Invalid coordinates', 'danger');
 }
+
+// Capture referrer URL for redirecting back
+$referrerUrl = $_SERVER['HTTP_REFERER'] ?? APP_URL;
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -40,7 +43,7 @@ if (!$lat || !$lng) {
         <i class="bi bi-geo-alt me-2"></i>Location Map
     </h1>
     <div class="con">
-        <button class="btn btn-danger px-4" onclick="closeFullMap()">
+        <button class="btn btn-danger px-4" onclick="closeFullMap('<?php echo htmlspecialchars($referrerUrl, ENT_QUOTES, 'UTF-8'); ?>')">
             Close
         </button>          
         <a href="javascript:history.back()" class="btn btn-outline-secondary">
@@ -91,7 +94,15 @@ if (!$lat || !$lng) {
     </div>
     <?php endif; ?>
 </div>
-
+<script>
+    function closeFullMap(referrerUrl) {
+        if (referrerUrl) {
+            window.location.href = referrerUrl;
+        } else {
+            history.back();
+        }
+    }
+</script>
 <?php 
 $extraScripts = <<<SCRIPT
 <script>
