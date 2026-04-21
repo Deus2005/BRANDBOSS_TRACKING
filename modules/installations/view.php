@@ -206,7 +206,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
     <div class="col-lg-4 mb-4">
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-info-circle me-2"></i>Report Information
+                <span class="d-flex align-text-center">
+                <span class="bi bi-info-circle me-2"></span>Report Information
+</span>
             </div>
             <div class="card-body">
                 <div class="text-center mb-3">
@@ -269,7 +271,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-geo-alt me-2"></i>Location
+                <span class="d-flex align-text-center">
+                <span class="bi bi-geo-alt me-2"></span>Location
+                    </span>
             </div>
             <div class="card-body">
                 <h5 class="mb-1"><?php echo clean($installation['area_name']); ?></h5>
@@ -320,7 +324,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         <!-- Store Details -->
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-shop me-2"></i>Store Details
+                <span class="d-flex align-text-center">
+                <span class="bi bi-shop me-2"></span>Store Details
+        </span>
             </div>
             <div class="card-body">
                 <table class="table table-sm table-borderless mb-0">
@@ -419,7 +425,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         <?php if (isset($installation['complete_address'])): ?>
         <div class="card mb-3">
             <div class="card-header bg-primary">
-                <i class="bi bi-pin-map me-2"></i>Complete Address
+                <span class="d-flex align-text-center">
+                <span class="bi bi-pin-map me-2"></span>Complete Address
+        </span>
             </div>
             <div class="card-body">
                 <p class="mb-2"><strong><?php echo clean($installation['complete_address']); ?></strong></p>
@@ -574,7 +582,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         <?php if (!empty($overallBeforePhotos) || !empty($overallAfterPhotos) || !empty($overallStorePhotos)): ?>
         <div class="card mb-4">
             <div class="card-header bg-primary">
-                <i class="bi bi-images me-2"></i>Overall Installation Photos
+                <span class="d-flex align-text-center">
+                <span class="bi bi-images me-2"></span>Overall Installation Photos
+        </span>
             </div>
             <div class="card-body">
                 <?php if (!empty($overallBeforePhotos)): ?>
@@ -649,7 +659,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         <!-- Installed Items -->
         <div class="card mb-4">
             <div class="card-header bg-primary">
-                <i class="bi bi-box-seam me-2"></i>Installed Items
+                <span class="d-flex align-text-center">
+                <span class="bi bi-box-seam me-2"></span>Installed Items
+                        </span>
             </div>
             <div class="card-body">
                 <?php foreach ($reportItems as $index => $item): ?>
@@ -759,19 +771,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         
         <!-- Inspection Schedule -->
         <div class="card">
-            <div class="card-header bg-primary">
-                <i class="bi bi-calendar-check me-2"></i>Inspection Schedule (6 Months)
+            <div class="card-header bg-dark text-white">
+                <span class="d-flex align-text-center">
+                <span class="bi bi-calendar-check me-2"></span>Inspection Schedule (6 Months)
+                        </span>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th class="text-center" width="80">Month</th>
-                                <th>Scheduled Date</th>
-                                <th>Inspector</th>
-                                <th>Status</th>
-                                <th class="text-center">Action</th>
+                                <th class="text-center text-nowrap px-3 py-2" style="width: 100px;">Month</th>
+                                <th class="text-nowrap px-3 py-2" style="width: 180px;">Scheduled Date</th>
+                                <th class="text-nowrap px-3 py-2" style="width: 180px;">Inspector</th>
+                                <th class="text-nowrap px-3 py-2" style="width: 140px;">Status</th>
+                                <th class="text-center text-nowrap px-3 py-2" style="width: 120px;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
