@@ -210,21 +210,22 @@ $reports = $db->fetch("SELECT * FROM installation_reports WHERE id = ?", [$insta
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </a>
                                         <div class="action-dropdown">
-                                                <?php if($inst['Permission'] === 'Permitted'): ?>
-                                                    <div class="edit-container">
-                                                        <a href="edit.php?id=<?php echo $inst['id']; ?>" class="btn-view" 
-                                                            title="edit">
-                                                            <div class="block-container">
-                                                                <div class="edit icon">
-                                                                    <i class="bi bi-pencil"></i>
-                                                                </div>
-                                                                <div class="edit text">
-                                                                    Edit
-                                                                </div>                                                 
+                                            <?php if($currentRole === 'user_2' && $inst['Permission'] === 'Permitted'): ?>
+                                                <div class="edit-container">
+                                                    <a href="edit.php?id=<?php echo $inst['id']; ?>" class="btn-view" 
+                                                        title="edit">
+                                                        <div class="block-container">
+                                                            <div class="edit icon">
+                                                                <i class="bi bi-pencil"></i>
                                                             </div>
-                                                        </a>
-                                                    </div>
-                                                <?php endif; ?>
+                                                            <div class="edit text">
+                                                                Edit
+                                                            </div>                                                 
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            <?php endif; ?>
+                                            
                                             <div class="view-container">
                                                 <a href="view.php?id=<?php echo $inst['id']; ?>" class="btn-view" 
                                                     title="View">
@@ -251,7 +252,25 @@ $reports = $db->fetch("SELECT * FROM installation_reports WHERE id = ?", [$insta
                                                     </div>
                                                 </a>    
                                             </div>
-                                            <?php if (in_array($currentRole, ['super_admin', 'user_1']) && $inst['status'] === 'rejected' && $inst['Permission'] === 'Not Permitted'): ?>        
+                                            <?php if (in_array($currentRole, ['super_admin', 'user_1']) && $inst['status'] === 'rejected' && $inst['Permission'] === 'Not Permitted' || $inst['Permission'] === 'Permitted'): ?>        
+                                                <?php if($inst['Permission'] === 'Permitted'): ?>
+                                                    <div class="NoPermit-container">
+                                                        <a href="view.php?id=<?php echo $inst['id']; ?>" class="btn-review" 
+                                                            title="NoPermit Edit"
+                                                            data-id="<?php echo $inst['id']; ?>"
+                                                            data-name="<?php echo clean($inst['report_code']); ?>">
+                                                            <div class="block-container">
+                                                                <div class="NoPermit icon">
+                                                                    <i class="bi bi-check2-square"></i>
+                                                                </div>
+                                                                <div class="NoPermit text">
+                                                                    Remove Permit
+                                                                </div>
+                                                            </div>
+                                                        </a>                                        
+                                                    </div>  
+                                                <?php endif; ?>
+                                                <?php if($inst['Permission'] === 'Not Permitted'): ?> 
                                                     <div class="Permit-container">
                                                         <a href="view.php?id=<?php echo $inst['id']; ?>" class="btn-review" 
                                                             title="Permit Edit"
@@ -266,7 +285,9 @@ $reports = $db->fetch("SELECT * FROM installation_reports WHERE id = ?", [$insta
                                                                 </div>
                                                             </div>
                                                         </a>                                        
-                                                    </div>                                                                       
+                                                    </div>                                                  
+                                                <?php endif; ?>
+                                                                     
                                             <?php endif; ?>
                                         </div>  
                                     </div>
