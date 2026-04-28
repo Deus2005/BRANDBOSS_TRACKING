@@ -142,7 +142,9 @@ $reasons = [
     <div class="col-lg-4 mb-4">
         <div class="card">
             <div class="card-header bg-primary">
-                <i class="bi bi-box-seam me-2"></i>Item Information
+                <span class="d-flex align-text-center">
+                <span class="bi bi-box-seam me-2"></span>Item Information
+</span>
             </div>
             <div class="card-body text-center">
                 <h5 class="mb-1"><?php echo clean($item['item_code']); ?></h5>
@@ -171,7 +173,9 @@ $reasons = [
         
         <div class="card">
             <div class="card-header bg-primary">
-                <i class="bi bi-info-circle me-2"></i>Guidelines
+                <span class="d-flex align-text-center">
+                <span class="bi bi-info-circle me-2"></span>Guidelines
+</span>
             </div>
             <div class="card-body">
                 <ul class="mb-0 ps-3">
@@ -187,7 +191,9 @@ $reasons = [
     <div class="col-lg-8 mb-4">
         <div class="card">
             <div class="card-header bg-primary">
-                <i class="bi bi-sliders me-2"></i>Adjustment Details
+                <span  class="d-flex align-text-center">
+                <span class="bi bi-sliders me-2"></span>Adjustment Details
+</span>
             </div>
             <div class="card-body">
                 <form method="POST" action="" id="adjustmentForm">
@@ -271,7 +277,7 @@ $reasons = [
                     
                     <div class="d-flex justify-content-end gap-2">
                         <a href="view.php?id=<?php echo $itemId; ?>" class="btn btn-outline-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                        <button type="submit" class="btn btn-danger" id="submitBtn" disabled>
                             <i class="bi bi-check-lg me-1"></i>Apply Adjustment
                         </button>
                     </div>
