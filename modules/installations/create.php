@@ -217,7 +217,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
             $db->insert('installation_detailed_addresses', $addressData);
 
             // Process overall installation photos (before & after & store)
-            $overallPhotoTypes = ['overall_before_photos' => 'before', 'overall_after_photos' => 'after', 'overall_store_photos' => 'StoreImage'];
+            $overallPhotoTypes = [
+                'overall_before_photos' => 'before', 
+                'overall_after_photos' => 'after', 
+                'overall_store_photos' => 'StoreImage'
+            ];
+
             foreach ($overallPhotoTypes as $fileKey => $photoType) {
                 if (isset($_FILES[$fileKey]) && !empty($_FILES[$fileKey]['name'][0])) {
                     $fileCount = count($_FILES[$fileKey]['name']);
@@ -472,7 +477,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedAssignment) {
         <span class="d-flex align-text-center">
         <span class="bi bi-clipboard-check me-2"></span>Select Assignment
     </div>
-    <div class="card-body bg-danger-subtle"
+    <div class="card-body bg-danger-subtle">
         <p class="text-muted">Choose an assignment to submit installation report:</p>
         <div class="row g-3">
             <?php foreach ($myAssignments as $assign): ?>
@@ -1285,7 +1290,6 @@ function getLocation() {
         return;
     }
 
-    // 🚀 STEP 1: Get quick location (fast, cached allowed)
     navigator.geolocation.getCurrentPosition(
         pos => {
             const { latitude, longitude } = pos.coords;
@@ -1308,7 +1312,6 @@ function getLocation() {
         }
     );
 
-    // 🎯 STEP 2: Refine in background (accurate)
     watchId = navigator.geolocation.watchPosition(
         pos => {
             const { latitude, longitude, accuracy } = pos.coords;

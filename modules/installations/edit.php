@@ -340,7 +340,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedReport) {
             $db->insert('installation_detailed_addresses', $addressData);
 
             // Process overall installation photos (before & after)
-            $overallPhotoTypes = ['overall_before_photos' => 'before', 'overall_after_photos' => 'after'];
+           $overallPhotoTypes = [
+                'overall_before_photos' => 'before', 
+                'overall_after_photos' => 'after', 
+                'overall_store_photos' => 'StoreImage'
+            ];
+            
             foreach ($overallPhotoTypes as $fileKey => $photoType) {
                 if (isset($_FILES[$fileKey]) && !empty($_FILES[$fileKey]['name'][0])) {
                     $fileCount = count($_FILES[$fileKey]['name']);
@@ -356,7 +361,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedReport) {
                         ];
 
                         // Upload with GPS watermark
-                        $photoPath = $photoType === 'before' ? BEFORE_PHOTO_PATH : AFTER_PHOTO_PATH;
+                        $photoPath = $photoType === 'before' ? BEFORE_PHOTO_PATH : ($photoType === 'after' ? AFTER_PHOTO_PATH : STORE_PHOTO_PATH);
                         $photoResult = uploadImage($file, $photoPath, $latitude, $longitude);
 
                         if (!$photoResult['success']) {
@@ -364,12 +369,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedReport) {
                         }
 
                         // Insert into installation_report_photos table
-                        $db->insert('installation_report_photos', [
-                            'report_id' => $reportId,
-                            'photo_type' => $photoType,
-                            'photo_filename' => $photoResult['filename'],
-                            'display_order' => $i
-                        ]);
+                        try {
+                            $insertResult = $db->insert('installation_report_photos', [
+                                'report_id' => $reportId,
+                                'photo_type' => $photoType,
+                                'photo_filename' => $photoResult['filename'],
+                                'display_order' => $i
+                            ]);
+                            
+                            if (!$insertResult) {
+                                error_log("Failed to insert {$photoType} photo for report {$reportId}: Insert returned false");
+                                throw new Exception("Failed to save {$photoType} photo to database");
+                            }
+                        } catch (Exception $e) {
+                            error_log("Error inserting {$photoType} photo: " . $e->getMessage());
+                            throw $e;
+                        }
                     }
                 }
             }
@@ -744,6 +759,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selectedReport) {
                                 <option value="reschedule" <?= old('store_status') == 'reschedule' ? 'selected' : '' ?>>Reschedule</option>
                                 <option value="others" <?= old('store_status') == 'others' ? 'selected' : '' ?>>Others</option>
                             </select>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-camera me-1"></i>Upload Store Image
+                                </label>
+                                <div class="multi-photo-upload" data-type="overall_store">
+                                    <input type="file" class="d-none" id="overall_store_input"
+                                        name="overall_store_photos[]" accept="image/*" capture="environment" multiple>
+                                    <div class="upload-placeholder" onclick="document.getElementById('overall_store_input').click()">
+                                        <i class="bi bi-cloud-upload display-6 text-muted"></i>
+                                        <p class="mb-1">Click to upload or take photos</p>
+                                        <small class="text-muted">You can select multiple photos at once</small>
+                                    </div>
+                                    <div class="photo-preview-grid" id="overall_store_preview"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1222,6 +1254,7 @@ function initPhotoUploads() {
     // Overall photos
     setupPhotoUpload('overall_before_input', 'overall_before_preview');
     setupPhotoUpload('overall_after_input', 'overall_after_preview');
+    setupPhotoUpload('overall_store_input', 'overall_store_preview');
 
     // Item photos - dynamically handled
     document.querySelectorAll('.item-photo-input').forEach(input => {
