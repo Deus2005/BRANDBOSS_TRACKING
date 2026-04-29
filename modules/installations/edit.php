@@ -11,7 +11,7 @@ $breadcrumbs = [
 
 require_once '../../includes/header.php';
 
-$auth->requireRole('user_2');
+$auth->requireRole(['user_2', 'user_1', 'super_admin']);
 
 $db = Database::getInstance();
 $userId = $auth->userId();

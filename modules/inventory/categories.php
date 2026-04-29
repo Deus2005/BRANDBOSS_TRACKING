@@ -54,18 +54,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAjax) {
                 if (empty($name)) {
                     throw new Exception('Category name is required');
                 }
+
+                if ($name && strlen($name) > 255) {
+                    throw new Exception('Category name cannot exceed 255 characters');
+                }
+
+                if ($name == intval($name)) {
+                    throw new Exception('Category name cannot be a number');
+                }
+
+                if ($name == intval($name) || $name == strlen($name) > 255 || $name == '') {
+                    throw new Exception('Invalid category name');
+                }   
+
+                if ($name == !ctype_alpha($name)) {
+                    throw new Exception('Category name must contain only letters');
+                }
                 
                 if ($db->exists('item_categories', 'category_name = ?', [$name])) {
                     throw new Exception('Category already exists');
                 }
                 
-                $id = $db->insert('item_categories', [
-                    'category_name' => $name,
-                    'description' => $description,
-                    'status' => 'active'
-                ]);
-                
-                echo json_encode(['success' => true, 'message' => 'Category added', 'id' => $id]);
+                if ($name == !intval($name) || $name == !strlen($name) > 255 || $name == !'') {
+                    $id = $db->insert('item_categories', [
+                        'category_name' => $name,
+                        'description' => $description, 
+                        'status' => 'active'
+                    ]); 
+                    
+                    echo json_encode(['success' => true, 'message' => 'Category added', 'id' => $id]);
+                }
+
                 break;
                 
             case 'edit':

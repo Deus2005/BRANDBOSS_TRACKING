@@ -157,6 +157,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
         redirect("view.php?id={$installationId}", 'Edit permission granted.', 'success');
     }
 
+    if ($action === 'remove_edit') {
+        $db->update('installation_reports', [
+            'Permission' => 'Not Permitted',
+            'reviewed_by' => $userId,
+            'reviewed_at' => date('Y-m-d H:i:s')
+        ], 'id = ?', [$installationId]);
+
+        createNotification(
+            $installation['installer_id'],
+            'Edit Permission Removed',
+            "Your installation report {$installation['report_code']} has been removed from the edit queue.",
+            'info',
+            APP_URL . "/modules/installations/view.php?id={$installationId}"
+        );
+
+        $auth->logActivity($userId, 'permit_edit_installation', 'installations', 'installation_reports', $installationId);
+        redirect("view.php?id={$installationId}", 'Edit permission removed.', 'success');
+    }
+
     if (in_array($action, ['approve', 'reject'])) {
         $newStatus = $action === 'approve' ? 'approved' : 'rejected';
         
@@ -541,6 +560,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($currentRole, ['super_admi
                     <input type="hidden" name="action" value="permit_edit">
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-check2-square me-1"></i> Allow Edit
+                    </button>
+                </form>
+            </div>
+        </div>
+        <?php endif; ?>
+        <?php if (in_array($currentRole, ['super_admin', 'user_1']) && $installation['status'] === 'rejected' && $installation['Permission'] === 'Permitted'): ?>
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <i class="bi bi-check2-square me-2"></i>Remove Edit Permit
+            </div>
+            <div class="card-body">
+                <p class="mb-3">This report was rejected and currently can be edited. Remove edit permission so the installer cannot update/change the rejected report.</p>
+                <form method="POST">
+                    <input type="hidden" name="action" value="remove_edit">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check2-square me-1"></i> Do not Allow Edit
                     </button>
                 </form>
             </div>
