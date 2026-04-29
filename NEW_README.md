@@ -50,6 +50,7 @@ Then in second attempt, the login will work
 2. Added table_municipality - to get municipality auto fill
 3. Added table_province - to get province auto fill
 4. Added table_region - to get region
+5. Added Store Type table - for store type dropdown
 **installation_reports**
 1. Added mnl_latitude and mnl_longitude - for manual longitude and latitude
 2. Added Permission - For Allow Editing
