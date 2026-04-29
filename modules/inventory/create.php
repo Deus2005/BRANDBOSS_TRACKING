@@ -35,12 +35,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validation
     $errors = validateRequired($data, ['item_code', 'item_name', 'category_id']);
-    
+
+    // Validate category Item Code
+    if ($data['item_code'] && strlen($data['item_code']) > 100) {
+        $errors['item_code'] = 'Item code cannot exceed 100 characters';
+    }   
+    // Validate category Item Name
+    if ($data['item_name'] == !ctype_alpha($data['item_name'])) {
+        $errors['item_name'] = 'Item name must contain only letters';
+    }
+    if ($data['item_name'] == intval($data['item_name']) || $data['item_name'] == strlen($data['item_name']) > 255 || empty($data['item_name'])) {
+        $errors['item_name'] = 'Invalid item name';    
+    }
+
+    // Validate Quantity Available
+    if ($data['quantity_available'] < 0 || $data['quantity_available'] > 1000000 || !is_int($data['quantity_available'])) {
+        $errors['quantity_available'] = 'Quantity must be a non-negative integer less than 1,000,000';
+    }
+    // Validate Unit Cost
+    if ($data['unit_cost'] < 0 || $data['unit_cost'] > 1000000) {
+        $errors['unit_cost'] = 'Unit cost must be a non-negative number or less than 1,000,000';
+    }
     // Check unique code
     if (empty($errors) && $db->exists('inventory_items', 'item_code = ?', [$data['item_code']])) {
         $errors['item_code'] = 'Item code already exists';
     }
-    
+
     if (empty($errors)) {
         try {
             $db->beginTransaction();
@@ -48,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $itemId = $db->insert('inventory_items', $data);
             
             // Log initial stock if any
-            if ($data['quantity_available'] > 0) {
+            if ($data['quantity_available'] > 0 || $data['quantity_available'] < 100000000 || is_int($data['quantity_available'])) {
                 $db->insert('inventory_transactions', [
                     'item_id' => $itemId,
                     'transaction_type' => 'stock_in',
@@ -57,14 +77,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'notes' => 'Initial stock',
                     'created_by' => $auth->userId()
                 ]);
+
+                // Log activity
+                $auth->logActivity($auth->userId(), 'created_item', 'inventory', 'inventory_items', $itemId);
+                
+                $db->commit();
+                redirect('index.php', 'Item added successfully!', 'success');                
             }
-            
-            // Log activity
-            $auth->logActivity($auth->userId(), 'created_item', 'inventory', 'inventory_items', $itemId);
-            
-            $db->commit();
-            redirect('index.php', 'Item added successfully!', 'success');
-            
+
         } catch (Exception $e) {
             $db->rollback();
             $errors['general'] = 'Failed to add item. Please try again.';
@@ -97,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="item_code" class="form-label">Item Code <span class="text-danger">*</span></label>
                     <input type="text" class="form-control <?php echo isset($errors['item_code']) ? 'is-invalid' : ''; ?>" 
                            id="item_code" name="item_code" value="<?php echo clean($_POST['item_code'] ?? ''); ?>" required>
-                    <?php if (isset($errors['item_code'])): ?>
+                    <?php if (!empty($errors['item_code'])): ?>
                     <div class="invalid-feedback"><?php echo $errors['item_code']; ?></div>
                     <?php endif; ?>
                     <div class="form-text">Unique identifier for this item</div>
@@ -107,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="item_name" class="form-label">Item Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control <?php echo isset($errors['item_name']) ? 'is-invalid' : ''; ?>" 
                            id="item_name" name="item_name" value="<?php echo clean($_POST['item_name'] ?? ''); ?>" required>
-                    <?php if (isset($errors['item_name'])): ?>
+                    <?php if (!empty($errors['item_name'])): ?>
                     <div class="invalid-feedback"><?php echo $errors['item_name']; ?></div>
                     <?php endif; ?>
                 </div>
@@ -123,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </option>
                         <?php endforeach; ?>
                     </select>
-                    <?php if (isset($errors['category_id'])): ?>
+                    <?php if (!empty($errors['category_id'])): ?>
                     <div class="invalid-feedback"><?php echo $errors['category_id']; ?></div>
                     <?php endif; ?>
                 </div>
@@ -149,6 +169,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="quantity_available" class="form-label">Initial Quantity</label>
                     <input type="number" class="form-control" id="quantity_available" name="quantity_available" 
                            value="<?php echo intval($_POST['quantity_available'] ?? 0); ?>" min="0">
+                    <?php if (!empty($errors['quantity_available'])): ?>
+                    <div class="invalid-feedback"><?php echo $errors['quantity_available']; ?></div>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="col-md-4 mb-3">
@@ -162,6 +185,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="unit_cost" class="form-label">Unit Cost (₱)</label>
                     <input type="number" class="form-control" id="unit_cost" name="unit_cost" 
                            value="<?php echo floatval($_POST['unit_cost'] ?? 0); ?>" min="0" step="0.01">
+                    <?php if (!empty($errors['unit_cost'])): ?>
+                    <div class="invalid-feedback"><?php echo $errors['unit_cost']; ?></div>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="col-md-6 mb-3">
