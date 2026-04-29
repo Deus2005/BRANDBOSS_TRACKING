@@ -16,7 +16,7 @@
 1. Notification list link
 2. Lable of type of notification: Info - Success - Warning - Danger 
 
-
+============================================================
 
 # Installations Module
 # Additional Features and Inputs
@@ -33,7 +33,6 @@
 **Sidebar**
 1. Added auto scrolling
 
-
 # Not Finish
 1. Notification - not redirect to the actual page after clicking the notification
 **Installation**
@@ -41,6 +40,21 @@
 **Login**
 1. Login page or Home Page - After first attempt of logging in, it will redirect back from home to login.
 Then in second attempt, the login will work
+
+=============================================================
+
+# Database
+
+# Tables
+1. Added table_barangay - to get barangay dropdown
+2. Added table_municipality - to get municipality auto fill
+3. Added table_province - to get province auto fill
+4. Added table_region - to get region
+**installation_reports**
+1. Added mnl_latitude and mnl_longitude - for manual longitude and latitude
+2. Added Permission - For Allow Editing
+**installation_report_photos**
+1. photo type - modify photo type column to all value "StoreImage"
 
 
 
