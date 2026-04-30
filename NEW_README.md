@@ -57,6 +57,53 @@ Then in second attempt, the login will work
 **installation_report_photos**
 1. photo type - modify photo type column to all value "StoreImage"
 
+=============================================================
+
+# Survey Module
+Additional Features: 
+1. Answered Survey History-Users can now view previously completed surveys.
+2. Results Validation
+3. Publish Survey Butto-Enables admins to publish surveys for user access.
+4. Delete Button-Allows removal of surveys with proper confirmation/validation.
+
+# Profile Module
+Database Update
+1. added separate fields for:
+First Name
+Last Name
+# Account Requirement:
+1. Phone number is now mandatory when creating an account.
+
+# Users Module
+Features:
+User Status Management
+Ability to:
+* Suspend users
+* Activate users
+
+# Role-Based Profile Colors
+* Admin – Red
+* Manager – Blue
+* Installer – Yellow
+* Inspector – Gray
+* Maintenance – Pink
+
+# Maintenance Module
+Improvements:
+1. Map - Map can now be opened within the same interface (no new tab required).
+
+# Installation Module
+Updates: 
+1. Reject Message - Displays reason when an installation request is rejected.
+2. Close Map Button
+Allows users to easily exit the map interface.
+
+
+# Inspection, Maintenance, installation, Assignments Reports
+General Enhancements
+1. Phone Number - Copy Button-One-click copy functionality for phone numbers.
+2. Photo Validation- Ensures uploaded images meet system requirements.
+3. Automatic Search Bar/Dropdown - Dynamic search functionality for faster data retrieval.
 
 
 
