@@ -34,11 +34,14 @@
 1. Added auto scrolling
 
 # Not Finish
-1. Notification - not redirect to the actual page after clicking the notification
+1. Notification 
+- not redirect to the actual page after clicking the notification
 **Installation**
-1. Edit Page - Upload Store Images photos not finished and not functional
+1. Edit Page 
+- Upload Store Images photos not finished and not functional
 **Login**
-1. Login page or Home Page - After first attempt of logging in, it will redirect back from home to login.
+1. Login page or Home Page 
+- After first attempt of logging in, it will redirect back from home to login.
 Then in second attempt, the login will work
 
 =============================================================
@@ -46,17 +49,38 @@ Then in second attempt, the login will work
 # Database
 
 # Tables
-1. Added table_barangay - to get barangay dropdown
-2. Added table_municipality - to get municipality auto fill
-3. Added table_province - to get province auto fill
-4. Added table_region - to get region
-5. Added Store Type table - for store type dropdown
-**installation_reports**
-1. Added mnl_latitude and mnl_longitude - for manual longitude and latitude
-2. Added Permission - For Allow Editing
-**installation_report_photos**
-1. photo type - modify photo type column to all value "StoreImage"
+-- NOTE: NOT ALL BARANGAY, MUNICIPALITY, PROVINCE AND REGION ARE LISTED.-- 
 
+1. Added table_barangay 
+- This stored the barangay list in barangay table
+- connected to table municipality by id
+- to get barangay dropdown
+2. Added table_municipality 
+- This stored the municipality list in municipality table
+- connected to province table by id
+- to get municipality auto fill
+3. Added table_province 
+- This stored the province list in province table 
+- connected to region table by id
+- to get province auto fill
+4. Added table_region 
+- This stored all the region list in region table
+- to get region
+5. Added Store Type table - for store type dropdown
+- Store all the types of the store and then return it for the dropdown
+**installation_reports table**
+1. Added mnl_latitude and mnl_longitude 
+- The manual entered latitude and longitude will be store here for matching and validation
+- for manual longitude and latitude
+2. Added Permission 
+- For Allowing installer to edit the form
+- This will serve as the permission of the manager or superadmin to edit the form
+**installation_report_photos table**
+1. Modify photo type 
+- modify photo type column to allow value "StoreImage" when storing Store Photos/Image
+**users table**
+1. Added last_name and first_name
+- This is used for the profile name and profile pic
 =============================================================
 
 # Survey Module
